@@ -26,4 +26,6 @@ if (app.Environment.IsDevelopment())
 app.UseCors("Frontend");
 app.MapControllers();
 
-app.Run();
+await app.Services.ApplyMigrationsAsync();
+
+await app.RunAsync();
