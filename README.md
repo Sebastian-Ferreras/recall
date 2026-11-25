@@ -16,6 +16,20 @@ recall/
 └── docs/        Documentación (flujo de Git, decisiones)
 ```
 
+## Base de datos
+
+La base SQLite (`recall.db`) se crea sola al iniciar la API, que aplica las migraciones pendientes. No hace falta ejecutar nada a mano.
+
+Para agregar una migración nueva (desde `backend/`):
+
+```
+dotnet ef migrations add <Nombre> --project Recall.Infrastructure --startup-project Recall.Api
+```
+
+## Errores
+
+Los errores se devuelven como JSON en formato `application/problem+json` (RFC 7807), con `status`, `title` y `traceId`. Aplica a los 400, 404 y 500. En desarrollo, los 500 incluyen además `detail` con el mensaje de la excepción.
+
 ## Ejecución
 
 **Backend** (desde `backend/`):
