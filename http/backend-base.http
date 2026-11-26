@@ -1,0 +1,30 @@
+# REST Client
+
+@baseUrl = http://localhost:5080
+
+###
+# swagger, 200
+GET {{baseUrl}}/swagger/index.html
+
+###
+# documento openapi, 200
+GET {{baseUrl}}/swagger/v1/swagger.json
+
+###
+# ruta inexistente, 404
+GET {{baseUrl}}/api/nada
+
+###
+# metodo no permitido, 405
+DELETE {{baseUrl}}/api/decks
+
+###
+# json mal formado, 400
+POST {{baseUrl}}/api/decks
+Content-Type: application/json
+
+{ "name": "sin cerrar"
+
+###
+# id que no es numero, 404
+GET {{baseUrl}}/api/decks/abc
