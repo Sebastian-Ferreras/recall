@@ -1,0 +1,97 @@
+# REST Client
+
+@baseUrl = http://localhost:5080
+
+###
+# crear mazo, 201
+# @name create
+POST {{baseUrl}}/api/decks
+Content-Type: application/json
+
+{ "name": "Ingles basico", "description": "Vocabulario" }
+
+###
+@deckId = {{create.response.body.id}}
+
+###
+# crear otro mazo, 201
+POST {{baseUrl}}/api/decks
+Content-Type: application/json
+
+{ "name": "Aleman", "description": null }
+
+###
+# nombre vacio, 400
+POST {{baseUrl}}/api/decks
+Content-Type: application/json
+
+{ "name": "", "description": null }
+
+###
+# nombre en blanco, 400
+POST {{baseUrl}}/api/decks
+Content-Type: application/json
+
+{ "name": "   ", "description": null }
+
+###
+# nombre de 101 caracteres, 400
+POST {{baseUrl}}/api/decks
+Content-Type: application/json
+
+{ "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "description": null }
+
+###
+# sin nombre, 400
+POST {{baseUrl}}/api/decks
+Content-Type: application/json
+
+{ "description": "sin nombre" }
+
+###
+# listar mazos, 200
+GET {{baseUrl}}/api/decks
+
+###
+# obtener mazo, 200
+GET {{baseUrl}}/api/decks/{{deckId}}
+
+###
+# mazo inexistente, 404
+GET {{baseUrl}}/api/decks/999
+
+###
+# editar mazo, 200
+PUT {{baseUrl}}/api/decks/{{deckId}}
+Content-Type: application/json
+
+{ "name": "  Ingles B1  ", "description": "Nuevo" }
+
+###
+# editar con descripcion en blanco, 200
+PUT {{baseUrl}}/api/decks/{{deckId}}
+Content-Type: application/json
+
+{ "name": "Ingles B1", "description": "  " }
+
+###
+# editar mazo inexistente, 404
+PUT {{baseUrl}}/api/decks/999
+Content-Type: application/json
+
+{ "name": "X", "description": null }
+
+###
+# editar con nombre vacio, 400
+PUT {{baseUrl}}/api/decks/{{deckId}}
+Content-Type: application/json
+
+{ "name": "", "description": null }
+
+###
+# eliminar mazo, 204
+DELETE {{baseUrl}}/api/decks/{{deckId}}
+
+###
+# eliminar mazo otra vez, 404
+DELETE {{baseUrl}}/api/decks/{{deckId}}
