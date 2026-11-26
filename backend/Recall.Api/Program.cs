@@ -1,3 +1,4 @@
+using Microsoft.Extensions.FileProviders;
 using Recall.Api.Middleware;
 using Recall.Application.Interfaces;
 using Recall.Application.Services;
@@ -23,6 +24,16 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod());
 });
 
+// la ruta es relativa a backend/Recall.Api porque el frontend vive fuera del proyecto
+var frontendPath = builder.Configuration["Frontend:Path"];
+var frontendFullPath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, frontendPath ?? ""));
+if (string.IsNullOrEmpty(frontendPath) || !Directory.Exists(frontendFullPath))
+{
+    throw new InvalidOperationException($"No se encontro la carpeta del frontend en {frontendFullPath}");
+}
+
+var frontendProvider = new PhysicalFileProvider(frontendFullPath);
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -35,6 +46,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("Frontend");
+app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = frontendProvider });
+app.UseStaticFiles(new StaticFileOptions { FileProvider = frontendProvider });
 app.MapControllers();
 
 await app.Services.ApplyMigrationsAsync();
