@@ -1,0 +1,163 @@
+# REST Client
+
+@baseUrl = http://localhost:5080
+
+###
+# crear mazo para las tarjetas, 201
+# @name createDeck
+POST {{baseUrl}}/api/decks
+Content-Type: application/json
+
+{ "name": "Ingles basico", "description": "Vocabulario" }
+
+###
+@deckId = {{createDeck.response.body.id}}
+
+###
+# crear tarjeta con textos recortados, 201
+# @name createCard
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "  Casa  ", "answer": "  House  " }
+
+###
+@cardId = {{createCard.response.body.id}}
+
+###
+# crear otra tarjeta, 201
+# @name createCard2
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "Perro", "answer": "Dog" }
+
+###
+@cardId2 = {{createCard2.response.body.id}}
+
+###
+# pregunta vacia, 400
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "", "answer": "House" }
+
+###
+# pregunta en blanco, 400
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "   ", "answer": "House" }
+
+###
+# respuesta vacia, 400
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "Casa", "answer": "" }
+
+###
+# respuesta en blanco, 400
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "Casa", "answer": "   " }
+
+###
+# sin pregunta, 400
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "answer": "House" }
+
+###
+# sin respuesta, 400
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "Casa" }
+
+###
+# pregunta de 501 caracteres, 400
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "answer": "House" }
+
+###
+# respuesta de 1001 caracteres, 400
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "Casa", "answer": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+
+###
+# crear tarjeta en mazo inexistente, 404
+POST {{baseUrl}}/api/decks/999/cards
+Content-Type: application/json
+
+{ "question": "Casa", "answer": "House" }
+
+###
+# listar tarjetas del mazo, 200
+GET {{baseUrl}}/api/decks/{{deckId}}/cards
+
+###
+# listar tarjetas de mazo inexistente, 404
+GET {{baseUrl}}/api/decks/999/cards
+
+###
+# el mazo muestra el cardCount, 200
+GET {{baseUrl}}/api/decks
+
+###
+# obtener tarjeta, 200
+GET {{baseUrl}}/api/cards/{{cardId}}
+
+###
+# tarjeta inexistente, 404
+GET {{baseUrl}}/api/cards/999
+
+###
+# editar tarjeta, 200
+PUT {{baseUrl}}/api/cards/{{cardId}}
+Content-Type: application/json
+
+{ "question": "  Hogar  ", "answer": "Home" }
+
+###
+# editar tarjeta inexistente, 404
+PUT {{baseUrl}}/api/cards/999
+Content-Type: application/json
+
+{ "question": "X", "answer": "Y" }
+
+###
+# editar con pregunta vacia, 400
+PUT {{baseUrl}}/api/cards/{{cardId}}
+Content-Type: application/json
+
+{ "question": "", "answer": "Home" }
+
+###
+# editar con respuesta en blanco, 400
+PUT {{baseUrl}}/api/cards/{{cardId}}
+Content-Type: application/json
+
+{ "question": "Hogar", "answer": "   " }
+
+###
+# eliminar tarjeta, 204
+DELETE {{baseUrl}}/api/cards/{{cardId}}
+
+###
+# eliminar tarjeta otra vez, 404
+DELETE {{baseUrl}}/api/cards/{{cardId}}
+
+###
+# eliminar el mazo con tarjetas, 204
+DELETE {{baseUrl}}/api/decks/{{deckId}}
+
+###
+# la otra tarjeta ya no existe por la cascada, 404
+GET {{baseUrl}}/api/cards/{{cardId2}}

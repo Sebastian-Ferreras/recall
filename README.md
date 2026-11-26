@@ -53,6 +53,27 @@ Ejemplo de cuerpo para `POST /api/decks`:
 }
 ```
 
+### Tarjetas
+
+| Método | Ruta | Respuesta |
+|---|---|---|
+| GET | `/api/decks/{deckId}/cards` | `200` con las tarjetas del mazo en orden de creación, o `404` si el mazo no existe |
+| GET | `/api/cards/{id}` | `200` con la tarjeta, o `404` |
+| POST | `/api/decks/{deckId}/cards` | `201` con la tarjeta creada y el header `Location`, `400` o `404` si el mazo no existe |
+| PUT | `/api/cards/{id}` | `200` con la tarjeta actualizada, `400` o `404` |
+| DELETE | `/api/cards/{id}` | `204`, o `404` |
+
+La pregunta es obligatoria y admite hasta 500 caracteres. La respuesta es obligatoria y admite hasta 1000. Ambas se guardan sin espacios al inicio ni al final. Al eliminar un mazo se eliminan también sus tarjetas.
+
+Ejemplo de cuerpo para `POST /api/decks/{id}/cards`:
+
+```json
+{
+  "question": "¿Cómo se dice 'gracias' en inglés?",
+  "answer": "Thank you"
+}
+```
+
 Las peticiones de ejemplo para probar la API están en la carpeta `http/` (extensión REST Client de VS Code).
 
 ## Ejecución

@@ -11,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<IDeckService, DeckService>();
+builder.Services.AddScoped<ICardService, CardService>();
 
 builder.Services.AddCors(options =>
 {
