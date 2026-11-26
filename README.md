@@ -5,15 +5,16 @@ Aplicación de flashcards para organizar y repasar tarjetas de estudio por mazos
 ## Stack
 
 - **Backend:** ASP.NET Core Web API (.NET 10), EF Core, SQLite
-- **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS
+- **Frontend:** HTML, JavaScript (módulos ES) y Tailwind CSS por CDN, sin paso de build
+
+El CDN de Tailwind compila los estilos en el navegador; para producción se usaría su CLI.
 
 ## Estructura
 
 ```
 recall/
 ├── backend/     API en capas (Api, Application, Domain, Infrastructure)
-├── frontend/    Aplicación Next.js
-└── docs/        Documentación (flujo de Git, decisiones)
+└── frontend/    Archivos estáticos que sirve la API
 ```
 
 ## Base de datos
@@ -78,20 +79,18 @@ Las peticiones de ejemplo para probar la API están en la carpeta `http/` (exten
 
 ## Ejecución
 
-**Backend** (desde `backend/`):
+Desde `backend/`:
 
 ```
 dotnet run --project Recall.Api
 ```
 
-La API queda en http://localhost:5080 (Swagger en `/swagger`).
+La app queda en http://localhost:5080 (Swagger en `/swagger`). La API sirve el frontend como archivos estáticos desde la carpeta `frontend/`, configurada en `Frontend:Path` de `appsettings.json`.
 
-**Frontend** (desde `frontend/`):
+### Frontend por separado
 
-```
-npm install
-npm run dev
-```
+Para servir el frontend aparte (`npx serve frontend` o Live Server):
 
-La app queda en http://localhost:3000. Copia `.env.example` a `.env.local` si necesitas cambiar la URL de la API.
+1. Cambia `API_URL` en `frontend/js/api.js` a `http://localhost:5080/api`
+2. Verifica que el origen del frontend esté en `Cors:Origins` de `appsettings.json` (por defecto `http://localhost:3000` y `http://127.0.0.1:5500`)
 
