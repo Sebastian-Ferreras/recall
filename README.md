@@ -30,6 +30,31 @@ dotnet ef migrations add <Nombre> --project Recall.Infrastructure --startup-proj
 
 Los errores se devuelven como JSON en formato `application/problem+json` (RFC 7807), con `status`, `title` y `traceId`. Aplica a los 400, 404 y 500. En desarrollo, los 500 incluyen además `detail` con el mensaje de la excepción.
 
+## API
+
+### Mazos
+
+| Método | Ruta | Respuesta |
+|---|---|---|
+| GET | `/api/decks` | `200` con la lista de mazos ordenada por nombre |
+| GET | `/api/decks/{id}` | `200` con el mazo, o `404` |
+| POST | `/api/decks` | `201` con el mazo creado y el header `Location`, o `400` |
+| PUT | `/api/decks/{id}` | `200` con el mazo actualizado, `400` o `404` |
+| DELETE | `/api/decks/{id}` | `204`, o `404` |
+
+El nombre es obligatorio y admite hasta 100 caracteres. La descripción es opcional y admite hasta 500; si llega en blanco se guarda como `null`.
+
+Ejemplo de cuerpo para `POST /api/decks`:
+
+```json
+{
+  "name": "Inglés básico",
+  "description": "Vocabulario de uso diario"
+}
+```
+
+Las peticiones de ejemplo para probar la API están en la carpeta `http/` (extensión REST Client de VS Code).
+
 ## Ejecución
 
 **Backend** (desde `backend/`):
