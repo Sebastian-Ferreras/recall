@@ -16,6 +16,7 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
         services.AddScoped<IDeckRepository, DeckRepository>();
+        services.AddScoped<ICardRepository, CardRepository>();
 
         return services;
     }
