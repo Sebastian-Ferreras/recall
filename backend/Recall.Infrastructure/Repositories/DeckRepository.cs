@@ -24,6 +24,11 @@ public class DeckRepository(AppDbContext db) : IDeckRepository
             .FirstOrDefaultAsync(d => d.Id == id, ct);
     }
 
+    public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)
+    {
+        return await db.Decks.AnyAsync(d => d.Id == id, ct);
+    }
+
     public async Task<Deck> AddAsync(Deck deck, CancellationToken ct = default)
     {
         db.Decks.Add(deck);
