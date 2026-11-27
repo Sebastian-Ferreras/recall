@@ -13,10 +13,9 @@ El CDN de Tailwind compila los estilos en el navegador; para producción se usar
 
 - **Mazos** (`/`): crear, editar y borrar mazos con confirmación, buscar por nombre o descripción y ordenar por recientes, nombre o cantidad de tarjetas
 - **Tarjetas** (`/deck.html?id=1`): crear, editar y borrar tarjetas de un mazo, voltearlas para ver la respuesta, buscar y ordenar, y editar el mazo desde la misma pantalla
+- **Repaso** (`/study.html?id=1`): tarjetas del mazo en orden aleatorio, voltear cada una, marcarla como sabida o fallada (teclas Espacio, `1` y `2`), ver el resultado al final y repetir el repaso completo o solo las falladas
 - Modo claro y oscuro, que sigue el del sistema y se recuerda entre visitas
 - Estados de carga, error con reintento, vacío y sin resultados en cada pantalla
-
-El enlace "Estudiar" apunta a `study.html`, que llega con el modo de repaso.
 
 ## Estructura
 
@@ -30,6 +29,7 @@ recall/
     │   └── components.css  Botones, campos, tarjetas e insignias
     ├── index.html   Mazos
     ├── deck.html    Tarjetas de un mazo
+    ├── study.html   Repaso de un mazo
     └── js/
         ├── api.js       Llamadas a la API
         ├── ui.js        Utilidades de interfaz (toast, errores de campo, confirmación)
@@ -38,7 +38,8 @@ recall/
         ├── theme.js     Cambio entre modo claro y oscuro
         ├── deckForm.js  Formulario de mazo, compartido por las dos pantallas
         ├── decks.js     Pantalla de mazos
-        └── deck.js      Pantalla de tarjetas
+        ├── deck.js      Pantalla de tarjetas
+        └── study.js     Pantalla de repaso
 ```
 
 ## Base de datos
@@ -83,6 +84,7 @@ Ejemplo de cuerpo para `POST /api/decks`:
 | Método | Ruta | Respuesta |
 |---|---|---|
 | GET | `/api/decks/{deckId}/cards` | `200` con las tarjetas del mazo en orden de creación, o `404` si el mazo no existe |
+| GET | `/api/decks/{deckId}/study` | `200` con las tarjetas del mazo en orden aleatorio (`[]` si no tiene), o `404` si el mazo no existe |
 | GET | `/api/cards/{id}` | `200` con la tarjeta, o `404` |
 | POST | `/api/decks/{deckId}/cards` | `201` con la tarjeta creada y el header `Location`, `400` o `404` si el mazo no existe |
 | PUT | `/api/cards/{id}` | `200` con la tarjeta actualizada, `400` o `404` |
