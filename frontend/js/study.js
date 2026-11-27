@@ -42,6 +42,8 @@ export function initStudyPage() {
   elements.card.addEventListener("click", flip);
   elements.hit.addEventListener("click", () => grade(true));
   elements.miss.addEventListener("click", () => grade(false));
+  elements["again-missed"].addEventListener("click", repeatMissed);
+  elements["again-all"].addEventListener("click", repeatAll);
   document.addEventListener("keydown", onKeydown);
   loadStudy();
 }
@@ -116,7 +118,27 @@ function advance() {
   updateStrip();
   render();
   if (state.status === "session") {
-    elements.card.focus({ preventScroll: true });
+    focusCard();
+  }
+}
+
+function focusCard() {
+  elements.card.focus({ preventScroll: true });
+}
+
+// las falladas se filtran de la sesion actual, sin volver a pedir nada a la API
+function repeatMissed() {
+  start(state.queue.filter((card, i) => state.results[i] === false));
+  state.status = "session";
+  render();
+  focusCard();
+}
+
+// se vuelve a pedir el repaso para recibir un orden nuevo del servidor
+async function repeatAll() {
+  await loadStudy();
+  if (state.status === "session") {
+    focusCard();
   }
 }
 
