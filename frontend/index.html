@@ -4,51 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Recall</title>
-    <!-- Sincrono y antes de pintar para evitar el parpadeo del tema -->
-    <script>
-      (() => {
-        let theme = null;
-        try {
-          theme = localStorage.getItem("recall-theme");
-        } catch {}
-        if (theme !== "dark" && theme !== "light") {
-          theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-        }
-        document.documentElement.dataset.theme = theme;
-      })();
-    </script>
+    <script src="/js/themeInit.js"></script>
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
     <link rel="stylesheet" href="/css/brand.css" />
     <link rel="stylesheet" href="/css/components.css" />
+    <script src="/js/tailwindTheme.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- El CDN de Tailwind solo compila bloques en linea, por eso @theme no puede ir en un archivo css -->
-    <style type="text/tailwindcss">
-      @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
-      @theme inline {
-        --color-canvas: var(--canvas);
-        --color-surface: var(--surface);
-        --color-sunken: var(--sunken);
-        --color-line: var(--line);
-        --color-line-strong: var(--line-strong);
-        --color-content: var(--content);
-        --color-content-muted: var(--content-muted);
-        --color-primary: var(--primary);
-        --color-primary-hover: var(--primary-hover);
-        --color-on-primary: var(--on-primary);
-        --color-accent: var(--accent);
-        --color-accent-text: var(--accent-text);
-        --color-accent-soft: var(--accent-soft);
-        --color-success: var(--success);
-        --color-success-text: var(--success-text);
-        --color-success-soft: var(--success-soft);
-        --color-danger: var(--danger);
-        --color-on-danger: var(--on-danger);
-        --color-danger-soft: var(--danger-soft);
-        --color-ring: var(--ring);
-        --font-display: Georgia, "Times New Roman", serif;
-      }
-    </style>
   </head>
   <body class="min-h-screen bg-canvas font-sans text-content antialiased">
     <header class="mx-auto flex max-w-6xl items-center justify-between px-4 pt-8 sm:px-6">
