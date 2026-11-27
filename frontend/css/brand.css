@@ -99,6 +99,24 @@ dialog::backdrop {
   box-shadow: 0 0 14px -4px rgb(209 174 114 / 0.16);
 }
 
+.flip {
+  perspective: 1200px;
+}
+.flip-inner {
+  transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.flip[aria-pressed="true"] .flip-inner {
+  transform: rotateY(180deg);
+}
+.face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.face-back {
+  transform: rotateY(180deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
