@@ -38,3 +38,42 @@ export async function request(path, options = {}) {
 
   return response.json();
 }
+
+export function getDecks() {
+  return request("/decks");
+}
+
+export function getDeck(id) {
+  return request(`/decks/${id}`);
+}
+
+export function createDeck(data) {
+  return request("/decks", { method: "POST", body: JSON.stringify(data) });
+}
+
+export function updateDeck(id, data) {
+  return request(`/decks/${id}`, { method: "PUT", body: JSON.stringify(data) });
+}
+
+export function deleteDeck(id) {
+  return request(`/decks/${id}`, { method: "DELETE" });
+}
+
+export function getCards(deckId) {
+  return request(`/decks/${deckId}/cards`);
+}
+
+export function createCard(deckId, data) {
+  return request(`/decks/${deckId}/cards`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateCard(id, data) {
+  return request(`/cards/${id}`, { method: "PUT", body: JSON.stringify(data) });
+}
+
+export function deleteCard(id) {
+  return request(`/cards/${id}`, { method: "DELETE" });
+}

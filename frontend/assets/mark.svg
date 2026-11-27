@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -40 80 80" role="img" aria-label="Recall">
+  <rect x="-36" y="-36" width="32" height="72" rx="5" fill="#1F2A44"/>
+  <text x="-20" y="1" text-anchor="middle" dominant-baseline="central" font-family="Georgia, 'Times New Roman', serif" font-size="24" fill="#F5F0E6">R</text>
+  <polygon points="3,-30 31,-22 31,24 3,32" fill="#B08D57" stroke="#B08D57" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="17,-8 23,1 17,10 11,1" fill="#1F2A44"/>
+</svg>
