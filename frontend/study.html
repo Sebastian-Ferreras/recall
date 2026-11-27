@@ -66,7 +66,35 @@
           <a id="empty-add" href="/" class="btn btn-primary mt-5"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-plus" /></svg>Agregar tarjetas</a>
         </div>
 
-        <div id="session" hidden class="mx-auto max-w-sm space-y-5"></div>
+        <div id="session" hidden class="mx-auto max-w-sm space-y-5">
+          <div class="relative mx-auto max-w-[20rem] pb-3.5 pr-3.5">
+            <div id="layer2" class="lift-soft absolute bottom-0 left-3 right-0 top-3 rounded-xl border border-line bg-surface"></div>
+            <div id="layer1" class="lift-soft absolute inset-1.5 rounded-xl border border-line bg-surface"></div>
+            <!-- perspective en linea: brand.css no esta en una capa y le gana a la utilidad de Tailwind -->
+            <button id="card" type="button" aria-pressed="false" style="perspective: 1600px" class="flip relative block aspect-[5/7] w-full cursor-pointer rounded-xl text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+              <span class="flip-inner relative block h-full w-full">
+                <span id="face-front" class="face absolute inset-0 block lift rounded-xl border border-line-strong/60 bg-surface">
+                  <span class="absolute inset-2 rounded-lg border border-line"></span>
+                  <span aria-hidden="true" class="absolute left-4 top-4 flex flex-col items-center gap-1.5 font-display text-2xl leading-none"><span class="pos"></span><span class="size-2 rotate-45 bg-accent"></span></span>
+                  <span aria-hidden="true" class="absolute bottom-4 right-4 flex rotate-180 flex-col items-center gap-1.5 font-display text-2xl leading-none"><span class="pos"></span><span class="size-2 rotate-45 bg-accent"></span></span>
+                  <span class="absolute inset-x-12 inset-y-16 flex overflow-y-auto"><span class="sr-only">Pregunta:</span><span id="question" class="my-auto block w-full whitespace-pre-line break-words text-center font-display text-2xl leading-snug"></span></span>
+                  <span aria-hidden="true" class="absolute inset-x-0 bottom-5 flex items-center justify-center gap-1.5 text-xs text-content-muted"><svg class="icon size-3.5"><use href="/assets/icons.svg#i-flip" /></svg>Toca para voltear</span>
+                </span>
+                <span id="face-back" class="face face-back absolute inset-0 block lift rounded-xl bg-primary text-on-primary">
+                  <span class="absolute inset-2 rounded-lg border border-on-primary/30"></span>
+                  <span aria-hidden="true" class="absolute left-4 top-4 flex flex-col items-center gap-1.5 font-display text-2xl leading-none"><span class="pos"></span><span class="size-2 rotate-45 bg-accent dark:bg-on-primary/70"></span></span>
+                  <span aria-hidden="true" class="absolute bottom-4 right-4 flex rotate-180 flex-col items-center gap-1.5 font-display text-2xl leading-none"><span class="pos"></span><span class="size-2 rotate-45 bg-accent dark:bg-on-primary/70"></span></span>
+                  <span class="absolute inset-x-12 inset-y-16 flex overflow-y-auto"><span class="sr-only">Respuesta:</span><span id="answer" class="my-auto block w-full whitespace-pre-line break-words text-center font-display text-2xl leading-snug"></span></span>
+                </span>
+              </span>
+            </button>
+          </div>
+          <p id="hint" class="pr-3.5 text-center text-sm text-content-muted">Pulsa <kbd class="rounded border border-line-strong bg-surface px-1.5 py-0.5 text-xs">Espacio</kbd> o toca la carta para ver la respuesta</p>
+          <div class="grid grid-cols-2 gap-3 pr-3.5">
+            <button id="miss" type="button" class="btn h-12 bg-danger-soft text-danger hover:opacity-80" disabled><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-x" /></svg>No lo sabia<kbd class="rounded border border-danger/40 px-1.5 text-xs font-normal">1</kbd></button>
+            <button id="hit" type="button" class="btn h-12 bg-success-soft text-success-text hover:opacity-80" disabled><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-check" /></svg>Lo sabia<kbd class="rounded border border-success-text/40 px-1.5 text-xs font-normal">2</kbd></button>
+          </div>
+        </div>
 
         <div id="result" hidden class="mx-auto max-w-2xl space-y-6"></div>
       </div>
