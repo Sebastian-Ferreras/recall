@@ -6,6 +6,7 @@ const state = {
   deck: null,
   cards: [],
   errorMessage: "",
+  flipped: new Set(),
 };
 
 const elements = {};
@@ -22,7 +23,72 @@ export function initDeckPage() {
   elements.newTemplate = document.getElementById("new-card-tile");
 
   elements.retry.addEventListener("click", () => loadDeck());
+  elements.grid.addEventListener("click", handleGridClick);
+  elements.viewDialog = document.getElementById("view-dialog");
+  for (const button of elements.viewDialog.querySelectorAll("[data-close]")) {
+    button.addEventListener("click", () => elements.viewDialog.close());
+  }
+  elements.viewDialog.addEventListener("click", (event) => {
+    if (event.target === elements.viewDialog) {
+      elements.viewDialog.close();
+    }
+  });
+  // el CDN de Tailwind aplica los estilos despues del primer render y la ventana cambia el ancho de la ficha, ambos alteran que texto queda recortado
+  new ResizeObserver(markClippedCards).observe(elements.grid);
   loadDeck();
+}
+
+function handleGridClick(event) {
+  const target = event.target.closest("[data-flip], [data-action]");
+  if (!target) {
+    return;
+  }
+  const article = target.closest("article");
+  if (article && (target.matches("[data-flip]") || target.dataset.action === "turn")) {
+    toggleFlip(article);
+  } else if (article && target.dataset.action === "view") {
+    openCardView(Number(article.dataset.id));
+  }
+}
+
+function openCardView(id) {
+  const index = state.cards.findIndex((card) => card.id === id);
+  if (index === -1) {
+    return;
+  }
+  const card = state.cards[index];
+  document.getElementById("view-title").textContent = `Tarjeta N.º ${index + 1}`;
+  document.getElementById("view-question").textContent = card.question;
+  document.getElementById("view-answer").textContent = card.answer;
+  elements.viewDialog.showModal();
+}
+
+// solo se ofrece "Ver completa" cuando line-clamp recorta el texto de alguna de las dos caras
+function markClippedCards() {
+  for (const article of elements.grid.querySelectorAll("article")) {
+    const clipped = [...article.querySelectorAll("[data-q], [data-a]")].some(
+      (text) => text.scrollHeight > text.clientHeight,
+    );
+    article.querySelector('[data-action="view"]').hidden = !clipped;
+  }
+}
+
+// solo cambia la ficha tocada, un render completo reiniciaria la animacion
+function toggleFlip(article) {
+  const id = Number(article.dataset.id);
+  const flipped = !state.flipped.has(id);
+  if (flipped) {
+    state.flipped.add(id);
+  } else {
+    state.flipped.delete(id);
+  }
+  applyFlip(article, flipped);
+}
+
+function applyFlip(article, flipped) {
+  article.querySelector("[data-flip]").setAttribute("aria-pressed", String(flipped));
+  article.querySelector("[data-front]").setAttribute("aria-hidden", String(flipped));
+  article.querySelector("[data-back]").setAttribute("aria-hidden", String(!flipped));
 }
 
 // el id viene de la URL, solo se acepta un entero positivo
@@ -135,12 +201,15 @@ function renderCards() {
   });
   fragment.append(elements.newTemplate.content.cloneNode(true));
   elements.grid.append(fragment);
+  markClippedCards();
 }
 
 function createCardItem(card, number) {
   const node = elements.cardTemplate.content.cloneNode(true);
 
-  node.querySelector("article").dataset.id = card.id;
+  const article = node.querySelector("article");
+  article.dataset.id = card.id;
+  applyFlip(article, state.flipped.has(card.id));
   for (const target of node.querySelectorAll("[data-n]")) {
     target.textContent = number;
   }

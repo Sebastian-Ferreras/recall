@@ -63,6 +63,8 @@
 
       .flip { perspective: 1200px; }
       .flip-inner { transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
+      .flip[aria-pressed="true"] .flip-inner { transform: rotateY(180deg); }
+      @media (prefers-reduced-motion: reduce) { .flip-inner { transition: none; } }
       .face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
       .face-back { transform: rotateY(180deg); }
       .ruled { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--line) 27px, var(--line) 28px); background-position: 0 6px; }
@@ -87,9 +89,9 @@
 
     <main id="app" class="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-10 sm:px-6">
       <div class="flex flex-wrap items-end justify-between gap-4 pr-3.5">
-        <div class="min-w-0 flex-1">
+        <div class="min-w-0 grow basis-64">
           <div class="flex items-center gap-2">
-            <h1 id="title" class="min-w-0 truncate text-3xl font-semibold tracking-tight">&nbsp;</h1>
+            <h1 id="title" class="-mb-1.5 min-w-0 truncate pb-1.5 text-3xl font-semibold tracking-tight">&nbsp;</h1>
             <button id="edit-deck" class="btn btn-ghost btn-sm flex-none invisible" type="button" aria-label="Editar mazo" title="Editar mazo">
               <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-edit" /></svg>
             </button>
@@ -166,6 +168,7 @@
         </div>
         <div class="flex items-center gap-1 pr-3.5">
           <button data-action="turn" class="btn btn-secondary btn-sm flex-1" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-flip" /></svg>Voltear</button>
+          <button data-action="view" class="btn btn-ghost btn-sm" type="button" hidden>Ver completa</button>
           <button data-action="edit" class="btn btn-ghost btn-sm" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-edit" /></svg></button>
           <button data-action="delete" class="btn btn-ghost btn-sm" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-trash" /></svg></button>
         </div>
@@ -179,6 +182,25 @@
         </button>
       </div>
     </template>
+
+    <dialog id="view-dialog" class="card w-[calc(100%-2rem)] max-w-lg p-0 text-content shadow-xl" aria-labelledby="view-title">
+      <div class="space-y-5 p-6">
+        <h2 id="view-title" class="text-lg font-semibold">Tarjeta</h2>
+        <div class="max-h-[60vh] space-y-5 overflow-y-auto pr-1">
+          <section class="space-y-1.5">
+            <h3 class="flex items-center gap-2 text-xs font-medium text-content-muted"><span aria-hidden="true" class="size-1.5 rotate-45 bg-accent"></span>Pregunta</h3>
+            <p id="view-question" class="whitespace-pre-line break-words font-display text-lg leading-7"></p>
+          </section>
+          <section class="space-y-1.5">
+            <h3 class="flex items-center gap-2 text-xs font-medium text-content-muted"><span aria-hidden="true" class="size-1.5 rotate-45 bg-accent"></span>Respuesta</h3>
+            <p id="view-answer" class="whitespace-pre-line break-words font-display text-lg leading-7"></p>
+          </section>
+        </div>
+        <div class="flex justify-end">
+          <button type="button" class="btn btn-secondary" data-close>Cerrar</button>
+        </div>
+      </div>
+    </dialog>
 
     <script type="module">
       import { initThemeToggle } from "/js/theme.js";
