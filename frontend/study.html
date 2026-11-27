@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recall - Repaso</title>
+    <script src="/js/themeInit.js"></script>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="stylesheet" href="/css/brand.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <script src="/js/tailwindTheme.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body class="min-h-screen bg-canvas font-sans text-content antialiased">
+    <header class="mx-auto flex max-w-6xl items-center justify-between px-4 pt-8 sm:px-6">
+      <a href="/" aria-label="Recall, inicio" class="rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+        <img class="h-16 dark:hidden" src="/assets/logo-horizontal.svg" alt="Recall" />
+        <img class="hidden h-16 dark:block" src="/assets/logo-horizontal-dark.svg" alt="Recall" />
+      </a>
+      <div class="flex items-center gap-2">
+        <nav aria-label="Principal">
+          <a href="/" class="rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Mazos</a>
+        </nav>
+        <button id="theme-toggle" class="btn btn-ghost" type="button" aria-label="Cambiar a modo oscuro">
+          <svg class="icon size-5" aria-hidden="true"><use href="/assets/icons.svg#i-moon" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="app" class="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-10 sm:px-6">
+      <div class="flex flex-wrap items-end justify-between gap-4 pr-3.5">
+        <div class="min-w-0 grow basis-64">
+          <h1 id="title" class="-mb-1.5 min-w-0 truncate pb-1.5 text-3xl font-semibold tracking-tight">&nbsp;</h1>
+          <p id="summary" class="mt-1 min-h-5 truncate text-sm text-content-muted" aria-live="polite">&nbsp;</p>
+        </div>
+        <a id="exit" class="btn btn-secondary invisible" href="/"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-back" /></svg>Salir del repaso</a>
+      </div>
+
+      <div id="missing" hidden class="mr-3.5 rounded-xl border border-line bg-surface px-6 py-16 text-center">
+        <img src="/assets/mark.svg" alt="" class="mx-auto size-14 opacity-80 dark:hidden" />
+        <img src="/assets/mark-dark.svg" alt="" class="mx-auto hidden size-14 opacity-80 dark:block" />
+        <h2 class="mt-4 text-lg font-semibold">No encontramos este mazo</h2>
+        <p class="mx-auto mt-1 max-w-sm text-sm text-content-muted">Puede que se haya borrado o que el enlace este mal escrito.</p>
+        <a href="/" class="btn btn-primary mt-5">Volver a mis mazos</a>
+      </div>
+
+      <div id="content" class="space-y-6">
+        <div id="strip" class="invisible mr-3.5 flex gap-1" role="progressbar" aria-label="Progreso del repaso" aria-valuemin="0"></div>
+
+        <div id="error" hidden role="alert" class="mr-3.5 flex flex-wrap items-center gap-3 rounded-xl border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg>
+          <p id="error-text" class="flex-1">No se pudieron cargar las tarjetas del repaso</p>
+          <button id="retry" class="btn btn-secondary btn-sm" type="button">Reintentar</button>
+        </div>
+
+        <div id="loading" hidden class="mx-auto max-w-sm space-y-5" role="status" aria-label="Cargando tarjetas">
+          <div class="mx-auto max-w-[20rem] pb-3.5 pr-3.5"><div class="aspect-[5/7] animate-pulse rounded-xl bg-sunken"></div></div>
+          <div class="grid grid-cols-2 gap-3 pr-3.5"><div class="h-12 animate-pulse rounded-lg bg-sunken"></div><div class="h-12 animate-pulse rounded-lg bg-sunken"></div></div>
+        </div>
+
+        <div id="empty" hidden class="mr-3.5 rounded-xl border border-dashed border-line-strong bg-surface px-6 py-16 text-center">
+          <img src="/assets/mark.svg" alt="" class="mx-auto size-14 dark:hidden" />
+          <img src="/assets/mark-dark.svg" alt="" class="mx-auto hidden size-14 dark:block" />
+          <h2 class="mt-4 text-lg font-semibold">Este mazo no tiene tarjetas</h2>
+          <p class="mx-auto mt-1 max-w-sm text-sm text-content-muted">Necesitas al menos una tarjeta para empezar a repasar.</p>
+          <a id="empty-add" href="/" class="btn btn-primary mt-5"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-plus" /></svg>Agregar tarjetas</a>
+        </div>
+
+        <div id="session" hidden class="mx-auto max-w-sm space-y-5">
+          <div class="relative mx-auto max-w-[20rem] pb-3.5 pr-3.5">
+            <div id="layer2" class="lift-soft absolute bottom-0 left-3 right-0 top-3 rounded-xl border border-line bg-surface"></div>
+            <div id="layer1" class="lift-soft absolute inset-1.5 rounded-xl border border-line bg-surface"></div>
+            <!-- perspective en linea: brand.css no esta en una capa y le gana a la utilidad de Tailwind -->
+            <button id="card" type="button" aria-pressed="false" style="perspective: 1600px" class="flip relative block aspect-[5/7] w-full cursor-pointer rounded-xl text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+              <span class="flip-inner relative block h-full w-full">
+                <span id="face-front" class="face absolute inset-0 block lift rounded-xl border border-line-strong/60 bg-surface">
+                  <span class="absolute inset-2 rounded-lg border border-line"></span>
+                  <span aria-hidden="true" class="absolute left-4 top-4 flex flex-col items-center gap-1.5 font-display text-2xl leading-none"><span class="pos"></span><span class="size-2 rotate-45 bg-accent"></span></span>
+                  <span aria-hidden="true" class="absolute bottom-4 right-4 flex rotate-180 flex-col items-center gap-1.5 font-display text-2xl leading-none"><span class="pos"></span><span class="size-2 rotate-45 bg-accent"></span></span>
+                  <span class="absolute inset-x-12 inset-y-16 flex overflow-y-auto [scrollbar-color:var(--line-strong)_transparent] [scrollbar-width:thin]"><span class="sr-only">Pregunta:</span><span id="question" class="my-auto block w-full whitespace-pre-line break-words text-center font-display text-2xl leading-snug"></span></span>
+                  <span aria-hidden="true" class="absolute inset-x-0 bottom-5 flex items-center justify-center gap-1.5 text-xs text-content-muted"><svg class="icon size-3.5"><use href="/assets/icons.svg#i-flip" /></svg>Toca para voltear</span>
+                </span>
+                <span id="face-back" class="face face-back absolute inset-0 block lift rounded-xl bg-primary text-on-primary">
+                  <span class="absolute inset-2 rounded-lg border border-on-primary/30"></span>
+                  <span aria-hidden="true" class="absolute left-4 top-4 flex flex-col items-center gap-1.5 font-display text-2xl leading-none"><span class="pos"></span><span class="size-2 rotate-45 bg-accent dark:bg-on-primary/70"></span></span>
+                  <span aria-hidden="true" class="absolute bottom-4 right-4 flex rotate-180 flex-col items-center gap-1.5 font-display text-2xl leading-none"><span class="pos"></span><span class="size-2 rotate-45 bg-accent dark:bg-on-primary/70"></span></span>
+                  <span class="absolute inset-x-12 inset-y-16 flex overflow-y-auto [scrollbar-color:var(--line-strong)_transparent] [scrollbar-width:thin]"><span class="sr-only">Respuesta:</span><span id="answer" class="my-auto block w-full whitespace-pre-line break-words text-center font-display text-2xl leading-snug"></span></span>
+                </span>
+              </span>
+            </button>
+          </div>
+          <p id="hint" class="pr-3.5 text-center text-sm text-content-muted">Pulsa <kbd class="rounded border border-line-strong bg-surface px-1.5 py-0.5 text-xs">Espacio</kbd> o toca la carta para ver la respuesta</p>
+          <div class="grid grid-cols-2 gap-3 pr-3.5">
+            <button id="miss" type="button" class="btn h-12 bg-danger-soft text-danger hover:opacity-80" disabled><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-x" /></svg>No lo sabia<kbd class="rounded border border-danger/40 px-1.5 text-xs font-normal">1</kbd></button>
+            <button id="hit" type="button" class="btn h-12 bg-success-soft text-success-text hover:opacity-80" disabled><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-check" /></svg>Lo sabia<kbd class="rounded border border-success-text/40 px-1.5 text-xs font-normal">2</kbd></button>
+          </div>
+        </div>
+
+        <div id="result" hidden class="mx-auto max-w-2xl space-y-6">
+          <div class="card space-y-6 p-8 text-center">
+            <img src="/assets/mark.svg" alt="" class="mx-auto size-14 dark:hidden" />
+            <img src="/assets/mark-dark.svg" alt="" class="mx-auto hidden size-14 dark:block" />
+            <div>
+              <p id="result-pct" class="font-display text-5xl tracking-tight"></p>
+              <p id="result-text" class="mt-2 text-content-muted"></p>
+            </div>
+            <div class="mx-auto grid max-w-sm grid-cols-2 gap-3 text-sm">
+              <p class="rounded-lg bg-success-soft px-4 py-3 text-success-text"><span id="result-hit" class="block text-2xl font-semibold"></span>Sabidas</p>
+              <p class="rounded-lg bg-danger-soft px-4 py-3 text-danger"><span id="result-miss" class="block text-2xl font-semibold"></span>Por repasar</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-3">
+              <button id="again-missed" class="btn btn-primary" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-flip" /></svg><span id="again-missed-text"></span></button>
+              <button id="again-all" class="btn btn-secondary" type="button">Repetir todo</button>
+              <a id="back-deck" href="/" class="btn btn-ghost">Volver al mazo</a>
+            </div>
+          </div>
+          <div id="missed-wrap" class="space-y-2">
+            <h2 class="text-sm font-semibold text-content-muted">Para repasar</h2>
+            <ul id="missed-list" class="card divide-y divide-line"></ul>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script type="module">
+      import { initThemeToggle } from "/js/theme.js";
+      import "/js/pageTransition.js";
+      import { initStudyPage } from "/js/study.js";
+
+      initThemeToggle(document.getElementById("theme-toggle"));
+      initStudyPage();
+    </script>
+  </body>
+</html>

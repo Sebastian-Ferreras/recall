@@ -25,6 +25,8 @@
   --danger-soft: #fdeeec;
 
   --ring: #34476b;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 [data-theme="dark"] {
@@ -97,6 +99,54 @@ dialog::backdrop {
 }
 [data-theme="dark"] .lift-soft {
   box-shadow: 0 0 14px -4px rgb(209 174 114 / 0.16);
+}
+
+.flip {
+  perspective: 1200px;
+}
+.flip-inner {
+  transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.flip[aria-pressed="true"] .flip-inner {
+  transform: rotateY(180deg);
+}
+.face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.face-back {
+  transform: rotateY(180deg);
+}
+
+.ruled {
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--line) 27px, var(--line) 28px);
+  background-position: 0 6px;
+}
+.ruled-back {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 27px,
+    color-mix(in oklab, var(--on-primary) 20%, transparent) 27px,
+    color-mix(in oklab, var(--on-primary) 20%, transparent) 28px
+  );
+  background-position: 0 6px;
+}
+
+main {
+  animation: page-in 350ms var(--ease-out) backwards;
+}
+.page-leaving {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 150ms ease-in, transform 150ms ease-in;
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

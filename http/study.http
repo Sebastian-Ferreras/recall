@@ -1,0 +1,81 @@
+# REST Client
+
+@baseUrl = http://localhost:5080
+
+###
+# crear mazo para el repaso, 201
+# @name createDeck
+POST {{baseUrl}}/api/decks
+Content-Type: application/json
+
+{ "name": "Repaso de ingles", "description": "Vocabulario" }
+
+###
+@deckId = {{createDeck.response.body.id}}
+
+###
+# crear tarjeta 1, 201
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "Casa", "answer": "House" }
+
+###
+# crear tarjeta 2, 201
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "Perro", "answer": "Dog" }
+
+###
+# crear tarjeta 3, 201
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "Gato", "answer": "Cat" }
+
+###
+# crear tarjeta 4, 201
+POST {{baseUrl}}/api/decks/{{deckId}}/cards
+Content-Type: application/json
+
+{ "question": "Libro", "answer": "Book" }
+
+###
+# repaso del mazo con las 4 tarjetas en orden aleatorio, 200
+GET {{baseUrl}}/api/decks/{{deckId}}/study
+
+###
+# repaso otra vez, 200 con las mismas tarjetas y normalmente otro orden
+GET {{baseUrl}}/api/decks/{{deckId}}/study
+
+###
+# crear mazo vacio, 201
+# @name createEmptyDeck
+POST {{baseUrl}}/api/decks
+Content-Type: application/json
+
+{ "name": "Mazo vacio" }
+
+###
+@emptyDeckId = {{createEmptyDeck.response.body.id}}
+
+###
+# repaso de un mazo sin tarjetas, 200 con []
+GET {{baseUrl}}/api/decks/{{emptyDeckId}}/study
+
+###
+# repaso de mazo inexistente, 404
+GET {{baseUrl}}/api/decks/999/study
+
+###
+# id no numerico, 404
+GET {{baseUrl}}/api/decks/abc/study
+
+###
+# eliminar el mazo con tarjetas, 204
+DELETE {{baseUrl}}/api/decks/{{deckId}}
+
+###
+# eliminar el mazo vacio, 204
+DELETE {{baseUrl}}/api/decks/{{emptyDeckId}}
