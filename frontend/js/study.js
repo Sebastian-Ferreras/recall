@@ -254,7 +254,8 @@ function render() {
   elements["error-text"].textContent = `No se pudieron cargar las tarjetas del repaso: ${state.errorMessage}`;
   elements.exit.classList.toggle("invisible", status === "missing");
 
-  if (loaded) {
+  // al repetir, el mazo ya esta cargado: se conserva el titulo durante la carga y el error
+  if (loaded || (deck !== null && status !== "missing")) {
     elements.title.textContent = deck.name;
     elements.title.title = deck.name;
     document.title = `Recall - Repaso de ${deck.name}`;
