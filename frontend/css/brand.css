@@ -1,0 +1,110 @@
+:root {
+  --canvas: #f6f7f9;
+  --surface: #ffffff;
+  --sunken: #eef0f4;
+  --line: #e2e6ed;
+  --line-strong: #8a93a5;
+
+  --content: #131b2e;
+  --content-muted: #566074;
+
+  --primary: #1f2a44;
+  --primary-hover: #2a3a5b;
+  --on-primary: #ffffff;
+
+  --accent: #b08d57;
+  --accent-text: #7a5f32;
+  --accent-soft: #f8f1e3;
+
+  --success: #2f7d55;
+  --success-text: #1f6a45;
+  --success-soft: #e7f4ec;
+
+  --danger: #b42318;
+  --on-danger: #ffffff;
+  --danger-soft: #fdeeec;
+
+  --ring: #34476b;
+}
+
+[data-theme="dark"] {
+  --canvas: #0e1422;
+  --surface: #151d31;
+  --sunken: #1b2540;
+  --line: #263250;
+  --line-strong: #5a6a94;
+
+  --content: #e9edf5;
+  --content-muted: #a3aec4;
+
+  --primary: #d1ae72;
+  --primary-hover: #ddbe88;
+  --on-primary: #0e1422;
+
+  --accent: #d1ae72;
+  --accent-text: #d9bc87;
+  --accent-soft: #2a2417;
+
+  --success: #3e9a6c;
+  --success-text: #6fd0a0;
+  --success-soft: #12291e;
+
+  --danger: #f5958b;
+  --on-danger: #0e1422;
+  --danger-soft: #34161a;
+
+  --ring: #d1ae72;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+dialog {
+  margin: auto;
+}
+
+dialog::backdrop {
+  background: rgb(14 20 34 / 0.55);
+}
+
+.lift {
+  box-shadow: 0 1px 2px rgb(31 58 138 / 0.14), 0 10px 24px -6px rgb(31 58 138 / 0.32);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.lift:hover {
+  box-shadow: 0 2px 4px rgb(31 58 138 / 0.16), 0 18px 34px -8px rgb(31 58 138 / 0.4);
+}
+.lift-soft {
+  box-shadow: 0 1px 2px rgb(31 58 138 / 0.1), 0 5px 12px -4px rgb(31 58 138 / 0.22);
+}
+[data-theme="dark"] .lift {
+  box-shadow: 0 0 0 1px rgb(209 174 114 / 0.16), 0 0 24px -4px rgb(209 174 114 / 0.28), 0 10px 24px -10px rgb(0 0 0 / 0.7);
+}
+[data-theme="dark"] .lift:hover {
+  box-shadow: 0 0 0 1px rgb(209 174 114 / 0.22), 0 0 28px -3px rgb(209 174 114 / 0.34), 0 12px 26px -10px rgb(0 0 0 / 0.7);
+}
+[data-theme="dark"] .lift-soft {
+  box-shadow: 0 0 14px -4px rgb(209 174 114 / 0.16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
