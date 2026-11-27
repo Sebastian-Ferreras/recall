@@ -1,5 +1,5 @@
 import { ApiError, createDeck, updateDeck } from "/js/api.js";
-import { setCounter, setFieldError } from "/js/ui.js";
+import { firstMessage, setCounter, setFieldError } from "/js/ui.js";
 
 const NAME_MAX = 100;
 const DESCRIPTION_MAX = 500;
@@ -125,8 +125,4 @@ function showError(error) {
     form.formError.querySelector("span").textContent = error.message;
     form.formError.hidden = false;
   }
-}
-
-function firstMessage(messages) {
-  return Array.isArray(messages) ? messages[0] : messages;
 }

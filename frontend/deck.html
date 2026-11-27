@@ -205,6 +205,40 @@
       </div>
     </template>
 
+    <dialog id="card-dialog" class="card w-[calc(100%-2rem)] max-w-lg p-0 text-content shadow-xl" aria-labelledby="card-dialog-title">
+      <form id="card-form" class="space-y-5 p-6" novalidate>
+        <h2 id="card-dialog-title" class="text-lg font-semibold">Nueva tarjeta</h2>
+        <div class="space-y-1.5">
+          <div class="flex justify-between">
+            <label for="card-question" class="text-sm font-medium">Pregunta</label>
+            <span id="card-question-count" class="text-xs text-content-muted">0 / 500</span>
+          </div>
+          <textarea id="card-question" rows="3" maxlength="500" class="field h-auto py-2" placeholder="¿Que quieres recordar?" aria-describedby="card-question-error"></textarea>
+          <p id="card-question-error" hidden class="flex items-center gap-1.5 text-sm text-danger">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg><span></span>
+          </p>
+        </div>
+        <div class="space-y-1.5">
+          <div class="flex justify-between">
+            <label for="card-answer" class="text-sm font-medium">Respuesta</label>
+            <span id="card-answer-count" class="text-xs text-content-muted">0 / 1000</span>
+          </div>
+          <textarea id="card-answer" rows="4" maxlength="1000" class="field h-auto py-2" placeholder="La respuesta correcta" aria-describedby="card-answer-error"></textarea>
+          <p id="card-answer-error" hidden class="flex items-center gap-1.5 text-sm text-danger">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg><span></span>
+          </p>
+        </div>
+        <p id="card-form-error" hidden role="alert" class="flex items-center gap-1.5 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg><span></span>
+        </p>
+        <div class="flex flex-wrap justify-end gap-3">
+          <button type="button" class="btn btn-secondary" data-close>Cancelar</button>
+          <button type="submit" id="card-another" class="btn btn-secondary">Guardar y agregar otra</button>
+          <button type="submit" id="card-submit" class="btn btn-primary">Agregar tarjeta</button>
+        </div>
+      </form>
+    </dialog>
+
     <dialog id="view-dialog" class="card w-[calc(100%-2rem)] max-w-lg p-0 text-content shadow-xl" aria-labelledby="view-title">
       <div class="space-y-5 p-6">
         <h2 id="view-title" class="text-lg font-semibold">Tarjeta</h2>
@@ -223,6 +257,10 @@
         </div>
       </div>
     </dialog>
+
+    <div id="toast" hidden role="status" class="fixed bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-on-primary shadow-lg">
+      <svg class="icon" aria-hidden="true"><use id="toast-icon" href="/assets/icons.svg#i-check" /></svg><span id="toast-text"></span>
+    </div>
 
     <script type="module">
       import { initThemeToggle } from "/js/theme.js";

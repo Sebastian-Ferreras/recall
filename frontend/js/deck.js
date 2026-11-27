@@ -1,5 +1,8 @@
-import { ApiError, getCards, getDeck } from "/js/api.js";
-import { normalizeText, plural } from "/js/ui.js";
+import { ApiError, createCard, getCards, getDeck, updateCard } from "/js/api.js";
+import { firstMessage, normalizeText, plural, setCounter, setFieldError, showToast } from "/js/ui.js";
+
+const QUESTION_MAX = 500;
+const ANSWER_MAX = 1000;
 
 const state = {
   status: "loading",
@@ -24,7 +27,7 @@ export function initDeckPage() {
   const ids = [
     "title", "summary", "count-badge", "edit-deck", "deck-actions", "study", "new-card",
     "missing", "content", "error", "error-text", "retry", "loading", "empty", "grid",
-    "toolbar", "search", "sort", "no-results", "no-results-q", "clear-search",
+    "toolbar", "search", "sort", "no-results", "no-results-q", "clear-search", "empty-new",
   ];
   for (const id of ids) {
     elements[id] = document.getElementById(id);
@@ -57,6 +60,9 @@ export function initDeckPage() {
       elements.viewDialog.close();
     }
   });
+  elements["new-card"].addEventListener("click", () => openCardForm(null));
+  elements["empty-new"].addEventListener("click", () => openCardForm(null));
+  connectCardForm();
   // el CDN de Tailwind aplica los estilos despues del primer render y la ventana cambia el ancho de la ficha, ambos alteran que texto queda recortado
   new ResizeObserver(markClippedCards).observe(elements.grid);
   loadDeck();
@@ -72,6 +78,13 @@ function handleGridClick(event) {
     toggleFlip(article);
   } else if (article && target.dataset.action === "view") {
     openCardView(Number(article.dataset.id));
+  } else if (target.dataset.action === "new") {
+    openCardForm(null);
+  } else if (article && target.dataset.action === "edit") {
+    const card = state.cards.find((item) => item.id === Number(article.dataset.id));
+    if (card) {
+      openCardForm(card);
+    }
   }
 }
 
@@ -121,7 +134,8 @@ function readDeckId() {
   return /^[1-9]\d*$/.test(value ?? "") ? Number(value) : null;
 }
 
-async function loadDeck() {
+// silent evita el esqueleto de carga al recargar tras guardar, que haria saltar la pantalla
+async function loadDeck({ silent = false } = {}) {
   const id = readDeckId();
   if (id === null) {
     state.status = "missing";
@@ -129,8 +143,10 @@ async function loadDeck() {
     return;
   }
 
-  state.status = "loading";
-  render();
+  if (!silent) {
+    state.status = "loading";
+    render();
+  }
 
   try {
     const [deck, cards] = await Promise.all([getDeck(id), getCards(id)]);
@@ -269,4 +285,145 @@ function createCardItem(card, number) {
   node.querySelector('[data-action="delete"]').setAttribute("aria-label", `Borrar la tarjeta ${number}`);
 
   return node;
+}
+
+const cardForm = { editing: null, opener: null };
+
+function connectCardForm() {
+  const dialog = document.getElementById("card-dialog");
+  Object.assign(cardForm, {
+    dialog,
+    form: dialog.querySelector("form"),
+    title: dialog.querySelector("#card-dialog-title"),
+    question: dialog.querySelector("#card-question"),
+    questionCount: dialog.querySelector("#card-question-count"),
+    questionError: dialog.querySelector("#card-question-error"),
+    answer: dialog.querySelector("#card-answer"),
+    answerCount: dialog.querySelector("#card-answer-count"),
+    answerError: dialog.querySelector("#card-answer-error"),
+    formError: dialog.querySelector("#card-form-error"),
+    another: dialog.querySelector("#card-another"),
+    submit: dialog.querySelector("#card-submit"),
+  });
+
+  cardForm.form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    submitCardForm(event.submitter === cardForm.another);
+  });
+  cardForm.question.addEventListener("input", () => {
+    setFieldError(cardForm.question, cardForm.questionError, null);
+    updateCardCounters();
+  });
+  cardForm.answer.addEventListener("input", () => {
+    setFieldError(cardForm.answer, cardForm.answerError, null);
+    updateCardCounters();
+  });
+  for (const field of [cardForm.question, cardForm.answer]) {
+    field.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        cardForm.form.requestSubmit(cardForm.submit);
+      }
+    });
+  }
+  for (const button of dialog.querySelectorAll("[data-close]")) {
+    button.addEventListener("click", () => dialog.close());
+  }
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) {
+      dialog.close();
+    }
+  });
+  dialog.addEventListener("close", () => {
+    if (cardForm.opener?.isConnected) {
+      cardForm.opener.focus();
+    }
+  });
+}
+
+function openCardForm(card) {
+  cardForm.editing = card;
+  cardForm.opener = document.activeElement;
+
+  cardForm.title.textContent = card ? "Editar tarjeta" : "Nueva tarjeta";
+  cardForm.submit.textContent = card ? "Guardar cambios" : "Agregar tarjeta";
+  cardForm.another.hidden = card !== null;
+  cardForm.question.value = card ? card.question : "";
+  cardForm.answer.value = card ? card.answer : "";
+  clearCardErrors();
+  updateCardCounters();
+
+  cardForm.dialog.showModal();
+  cardForm.question.focus();
+}
+
+function updateCardCounters() {
+  setCounter(cardForm.question, cardForm.questionCount, QUESTION_MAX);
+  setCounter(cardForm.answer, cardForm.answerCount, ANSWER_MAX);
+}
+
+function clearCardErrors() {
+  setFieldError(cardForm.question, cardForm.questionError, null);
+  setFieldError(cardForm.answer, cardForm.answerError, null);
+  cardForm.formError.hidden = true;
+}
+
+async function submitCardForm(addAnother) {
+  clearCardErrors();
+
+  const question = cardForm.question.value.trim();
+  const answer = cardForm.answer.value.trim();
+  if (!question || !answer) {
+    setFieldError(cardForm.question, cardForm.questionError, question ? null : "La pregunta es obligatoria");
+    setFieldError(cardForm.answer, cardForm.answerError, answer ? null : "La respuesta es obligatoria");
+    (question ? cardForm.answer : cardForm.question).focus();
+    return;
+  }
+  const data = { question, answer };
+
+  cardForm.submit.disabled = true;
+  cardForm.another.disabled = true;
+  try {
+    const editing = cardForm.editing;
+    const saved = editing ? await updateCard(editing.id, data) : await createCard(state.deck.id, data);
+    await loadDeck({ silent: true });
+    showToast(editing ? "Tarjeta actualizada" : "Tarjeta agregada");
+
+    if (addAnother) {
+      cardForm.question.value = "";
+      cardForm.answer.value = "";
+      updateCardCounters();
+      cardForm.question.focus();
+    } else {
+      cardForm.dialog.close();
+      if (!editing) {
+        elements.grid.querySelector(`[data-id="${saved.id}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+    }
+  } catch (error) {
+    showCardError(error);
+  } finally {
+    cardForm.submit.disabled = false;
+    cardForm.another.disabled = false;
+  }
+}
+
+function showCardError(error) {
+  if (!(error instanceof ApiError)) {
+    throw error;
+  }
+
+  const questionMessage = firstMessage(error.errors.Question);
+  const answerMessage = firstMessage(error.errors.Answer);
+  setFieldError(cardForm.question, cardForm.questionError, questionMessage);
+  setFieldError(cardForm.answer, cardForm.answerError, answerMessage);
+
+  if (questionMessage) {
+    cardForm.question.focus();
+  } else if (answerMessage) {
+    cardForm.answer.focus();
+  } else {
+    cardForm.formError.querySelector("span").textContent = error.message;
+    cardForm.formError.hidden = false;
+  }
 }

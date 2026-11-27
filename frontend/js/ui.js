@@ -19,6 +19,11 @@ export function setCounter(input, counter, max) {
   counter.textContent = `${input.value.length} / ${max}`;
 }
 
+// ASP.NET devuelve los mensajes de cada campo como lista
+export function firstMessage(messages) {
+  return Array.isArray(messages) ? messages[0] : messages;
+}
+
 export function setFieldError(input, errorElement, message) {
   const invalid = Boolean(message);
   errorElement.querySelector("span").textContent = invalid ? message : "";
