@@ -1,4 +1,5 @@
 import { ApiError, createCard, deleteCard, getCards, getDeck, updateCard } from "/js/api.js";
+import { openDeckForm } from "/js/deckForm.js";
 import { confirmDelete, firstMessage, normalizeText, plural, setCounter, setFieldError, showToast } from "/js/ui.js";
 
 const QUESTION_MAX = 500;
@@ -62,6 +63,12 @@ export function initDeckPage() {
   });
   elements["new-card"].addEventListener("click", () => openCardForm(null));
   elements["empty-new"].addEventListener("click", () => openCardForm(null));
+  elements["edit-deck"].addEventListener("click", () => {
+    openDeckForm(document.getElementById("deck-dialog"), state.deck, async () => {
+      await loadDeck({ silent: true });
+      showToast("Mazo actualizado");
+    });
+  });
   connectCardForm();
   // el CDN de Tailwind aplica los estilos despues del primer render y la ventana cambia el ancho de la ficha, ambos alteran que texto queda recortado
   new ResizeObserver(markClippedCards).observe(elements.grid);
@@ -229,9 +236,9 @@ function render() {
   }
 
   if (loaded) {
-    document.title = `${deck.name} - Recall`;
+    document.title = `Recall - ${deck.name}`;
   } else if (status === "missing") {
-    document.title = "Mazo no encontrado - Recall";
+    document.title = "Recall - Mazo no encontrado";
   }
   elements["count-badge"].textContent = loaded ? plural(cardCount, "tarjeta", "tarjetas") : "";
 }

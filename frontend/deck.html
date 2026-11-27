@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mazo - Recall</title>
+    <title>Recall - Mazo</title>
     <!-- Sincrono y antes de pintar para evitar el parpadeo del tema -->
     <script>
       (() => {
@@ -79,7 +79,7 @@
       </a>
       <div class="flex items-center gap-2">
         <nav aria-label="Principal">
-          <a href="/" class="rounded-lg px-3 py-2 text-sm font-medium">Mazos</a>
+          <a href="/" class="rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Mazos</a>
         </nav>
         <button id="theme-toggle" class="btn btn-ghost" type="button" aria-label="Cambiar a modo oscuro">
           <svg class="icon size-5" aria-hidden="true"><use href="/assets/icons.svg#i-moon" /></svg>
@@ -204,6 +204,39 @@
         </button>
       </div>
     </template>
+
+    <dialog id="deck-dialog" class="card w-[calc(100%-2rem)] max-w-md p-0 text-content shadow-xl" aria-labelledby="deck-dialog-title">
+      <form id="deck-form" class="space-y-5 p-6" novalidate>
+        <h2 id="deck-dialog-title" class="text-lg font-semibold">Nuevo mazo</h2>
+        <div class="space-y-1.5">
+          <div class="flex justify-between">
+            <label for="deck-name" class="text-sm font-medium">Nombre</label>
+            <span id="deck-name-count" class="text-xs text-content-muted">0 / 100</span>
+          </div>
+          <input id="deck-name" class="field" maxlength="100" placeholder="Por ejemplo, Anatomia basica" aria-describedby="deck-name-error" />
+          <p id="deck-name-error" hidden class="flex items-center gap-1.5 text-sm text-danger">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg><span></span>
+          </p>
+        </div>
+        <div class="space-y-1.5">
+          <div class="flex justify-between">
+            <label for="deck-desc" class="text-sm font-medium">Descripcion <span class="font-normal text-content-muted">(opcional)</span></label>
+            <span id="deck-desc-count" class="text-xs text-content-muted">0 / 500</span>
+          </div>
+          <textarea id="deck-desc" rows="3" maxlength="500" class="field h-auto py-2" placeholder="¿Que vas a estudiar con este mazo?" aria-describedby="deck-desc-error"></textarea>
+          <p id="deck-desc-error" hidden class="flex items-center gap-1.5 text-sm text-danger">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg><span></span>
+          </p>
+        </div>
+        <p id="deck-form-error" hidden role="alert" class="flex items-center gap-1.5 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg><span></span>
+        </p>
+        <div class="flex justify-end gap-3">
+          <button type="button" class="btn btn-secondary" data-close>Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="deck-submit">Crear mazo</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog id="card-dialog" class="card w-[calc(100%-2rem)] max-w-lg p-0 text-content shadow-xl" aria-labelledby="card-dialog-title">
       <form id="card-form" class="space-y-5 p-6" novalidate>
