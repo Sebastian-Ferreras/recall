@@ -89,6 +89,22 @@
         </button>
       </div>
 
+      <div id="toolbar" hidden class="grid gap-x-6 gap-y-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div class="relative pr-3.5 md:col-span-2 lg:col-span-3">
+          <svg class="icon pointer-events-none absolute left-3 top-3 text-content-muted" aria-hidden="true"><use href="/assets/icons.svg#i-search" /></svg>
+          <input id="search" class="field pl-9" type="search" placeholder="Buscar mazos" aria-label="Buscar mazos" autocomplete="off" />
+        </div>
+        <div class="relative pr-3.5">
+          <label for="sort" class="sr-only">Ordenar mazos</label>
+          <svg class="icon pointer-events-none absolute right-[30px] top-3 text-content-muted" aria-hidden="true"><use href="/assets/icons.svg#i-chevron" /></svg>
+          <select id="sort" class="field appearance-none pr-10">
+            <option value="recent">Ordenar: mas recientes</option>
+            <option value="name">Ordenar: nombre (A-Z)</option>
+            <option value="cards">Ordenar: mas tarjetas</option>
+          </select>
+        </div>
+      </div>
+
       <div id="error" hidden role="alert" class="mr-3.5 flex flex-wrap items-center gap-3 rounded-xl border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger">
         <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg>
         <p id="error-text" class="flex-1">No se pudieron cargar los mazos</p>
@@ -110,6 +126,12 @@
         <button id="empty-new" class="btn btn-primary mt-5" type="button">
           <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-plus" /></svg>Crear mi primer mazo
         </button>
+      </div>
+
+      <div id="no-results" hidden class="mr-3.5 rounded-xl border border-line bg-surface px-6 py-12 text-center">
+        <h2 class="font-semibold">Sin resultados para «<span id="no-results-q"></span>»</h2>
+        <p class="mt-1 text-sm text-content-muted">Prueba con otra palabra o revisa la ortografia.</p>
+        <button id="clear-search" class="btn btn-secondary btn-sm mt-4" type="button">Limpiar busqueda</button>
       </div>
 
       <div id="grid" class="grid items-start gap-x-6 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
