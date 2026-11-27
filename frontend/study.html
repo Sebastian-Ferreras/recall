@@ -96,7 +96,29 @@
           </div>
         </div>
 
-        <div id="result" hidden class="mx-auto max-w-2xl space-y-6"></div>
+        <div id="result" hidden class="mx-auto max-w-2xl space-y-6">
+          <div class="card space-y-6 p-8 text-center">
+            <img src="/assets/mark.svg" alt="" class="mx-auto size-14 dark:hidden" />
+            <img src="/assets/mark-dark.svg" alt="" class="mx-auto hidden size-14 dark:block" />
+            <div>
+              <p id="result-pct" class="font-display text-5xl tracking-tight"></p>
+              <p id="result-text" class="mt-2 text-content-muted"></p>
+            </div>
+            <div class="mx-auto grid max-w-sm grid-cols-2 gap-3 text-sm">
+              <p class="rounded-lg bg-success-soft px-4 py-3 text-success-text"><span id="result-hit" class="block text-2xl font-semibold"></span>Sabidas</p>
+              <p class="rounded-lg bg-danger-soft px-4 py-3 text-danger"><span id="result-miss" class="block text-2xl font-semibold"></span>Por repasar</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-3">
+              <button id="again-missed" class="btn btn-primary" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-flip" /></svg><span id="again-missed-text"></span></button>
+              <button id="again-all" class="btn btn-secondary" type="button">Repetir todo</button>
+              <a id="back-deck" href="/" class="btn btn-ghost">Volver al mazo</a>
+            </div>
+          </div>
+          <div id="missed-wrap" class="space-y-2">
+            <h2 class="text-sm font-semibold text-content-muted">Para repasar</h2>
+            <ul id="missed-list" class="card divide-y divide-line"></ul>
+          </div>
+        </div>
       </div>
     </main>
 

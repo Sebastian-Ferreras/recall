@@ -22,6 +22,8 @@ export function initStudyPage() {
     "title", "summary", "exit", "missing", "content", "strip", "error", "error-text",
     "retry", "loading", "empty", "empty-add", "session", "result", "layer1", "layer2", "card",
     "face-front", "face-back", "question", "answer", "hint", "miss", "hit",
+    "result-pct", "result-text", "result-hit", "result-miss", "again-missed", "again-missed-text",
+    "again-all", "back-deck", "missed-wrap", "missed-list",
   ];
   for (const id of ids) {
     elements[id] = document.getElementById(id);
@@ -33,6 +35,7 @@ export function initStudyPage() {
     const deckUrl = `/deck.html?id=${state.deckId}`;
     elements.exit.href = deckUrl;
     elements["empty-add"].href = deckUrl;
+    elements["back-deck"].href = deckUrl;
   }
 
   elements.retry.addEventListener("click", () => loadStudy());
@@ -141,6 +144,36 @@ function renderFlip() {
   elements.miss.disabled = !flipped;
 }
 
+function renderResult(known, missed) {
+  const total = state.queue.length;
+  elements["result-pct"].textContent = `${Math.round((known / total) * 100)} %`;
+  elements["result-text"].textContent =
+    `Sabias ${known} de ${plural(total, "tarjeta", "tarjetas")}${missed === 0 ? ". ¡Repaso perfecto!" : "."}`;
+  elements["result-hit"].textContent = String(known);
+  elements["result-miss"].textContent = String(missed);
+  elements["again-missed"].hidden = missed === 0;
+  elements["again-missed-text"].textContent = `Repasar las ${plural(missed, "fallada", "falladas")}`;
+  elements["missed-wrap"].hidden = missed === 0;
+
+  const items = [];
+  state.queue.forEach((card, i) => {
+    if (state.results[i] !== false) {
+      return;
+    }
+    const item = document.createElement("li");
+    item.className = "p-4";
+    const question = document.createElement("p");
+    question.className = "font-medium";
+    question.textContent = card.question;
+    const answer = document.createElement("p");
+    answer.className = "text-sm text-content-muted";
+    answer.textContent = card.answer;
+    item.append(question, answer);
+    items.push(item);
+  });
+  elements["missed-list"].replaceChildren(...items);
+}
+
 function renderCard() {
   const { queue, index } = state;
   const card = queue[index];
@@ -216,7 +249,8 @@ function render() {
       `Tarjeta ${state.index + 1} de ${queue.length} · ${plural(known, "sabida", "sabidas")} · ${missed} por repasar`;
     renderCard();
   } else if (status === "result") {
-    elements.summary.textContent = `Repaso terminado · ${plural(known, "sabida", "sabidas")} · ${missed} por repasar`;
+    elements.summary.textContent = "Resultado del repaso";
+    renderResult(known, missed);
   } else if (status === "empty") {
     elements.summary.textContent = "Sin tarjetas para repasar";
   } else if (status === "missing") {
