@@ -26,12 +26,15 @@ recall/
 └── frontend/    Archivos estáticos que sirve la API
     ├── assets/      Logo, favicon e iconos de la marca
     ├── css/
-    │   └── brand.css    Variables de color y estilos compartidos
+    │   ├── brand.css       Variables de color, sombras, giro de tarjetas y estilos compartidos
+    │   └── components.css  Botones, campos, tarjetas e insignias
     ├── index.html   Mazos
     ├── deck.html    Tarjetas de un mazo
     └── js/
         ├── api.js       Llamadas a la API
         ├── ui.js        Utilidades de interfaz (toast, errores de campo, confirmación)
+        ├── themeInit.js     Fija el tema antes de pintar para evitar el parpadeo
+        ├── tailwindTheme.js Colores y modo oscuro de Tailwind, cargado antes del CDN
         ├── theme.js     Cambio entre modo claro y oscuro
         ├── deckForm.js  Formulario de mazo, compartido por las dos pantallas
         ├── decks.js     Pantalla de mazos
