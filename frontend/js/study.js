@@ -1,6 +1,8 @@
 import { ApiError, getDeck, getStudyCards } from "/js/api.js";
 import { plural, readDeckId } from "/js/ui.js";
 
+const FLIP_MS = 450;
+
 const state = {
   status: "loading",
   deckId: null,
@@ -9,6 +11,7 @@ const state = {
   results: [],
   index: 0,
   flipped: false,
+  busy: false,
   errorMessage: "",
 };
 
@@ -34,6 +37,9 @@ export function initStudyPage() {
 
   elements.retry.addEventListener("click", () => loadStudy());
   elements.card.addEventListener("click", flip);
+  elements.hit.addEventListener("click", () => grade(true));
+  elements.miss.addEventListener("click", () => grade(false));
+  document.addEventListener("keydown", onKeydown);
   loadStudy();
 }
 
@@ -42,6 +48,7 @@ function start(cards) {
   state.results = cards.map(() => null);
   state.index = 0;
   state.flipped = false;
+  state.busy = false;
 
   elements.strip.replaceChildren(
     ...cards.map(() => {
@@ -54,26 +61,74 @@ function start(cards) {
   updateStrip();
 }
 
-function updateStrip() {
-  const { results, index } = state;
-  elements.strip.setAttribute("aria-valuenow", String(Math.min(index, results.length)));
-  for (const i of [index - 1, index]) {
-    const segment = elements.strip.children[i];
-    if (!segment) {
-      continue;
-    }
-    const result = results[i];
-    segment.classList.remove("bg-success", "bg-danger", "bg-accent", "bg-sunken");
-    segment.classList.add(result === true ? "bg-success" : result === false ? "bg-danger" : i === index ? "bg-accent" : "bg-sunken");
+function paintSegment(i) {
+  const segment = elements.strip.children[i];
+  if (!segment) {
+    return;
   }
+  const result = state.results[i];
+  segment.classList.remove("bg-success", "bg-danger", "bg-accent", "bg-sunken");
+  segment.classList.add(result === true ? "bg-success" : result === false ? "bg-danger" : i === state.index ? "bg-accent" : "bg-sunken");
+}
+
+function updateStrip() {
+  elements.strip.setAttribute("aria-valuenow", String(Math.min(state.index, state.results.length)));
+  paintSegment(state.index - 1);
+  paintSegment(state.index);
 }
 
 function flip() {
-  if (state.status !== "session") {
+  if (state.busy || state.status !== "session") {
     return;
   }
   state.flipped = !state.flipped;
   renderFlip();
+}
+
+function grade(known) {
+  if (state.busy || !state.flipped || state.status !== "session") {
+    return;
+  }
+  state.busy = true;
+  state.results[state.index] = known;
+  state.flipped = false;
+  renderFlip();
+  paintSegment(state.index);
+
+  // la espera deja terminar el giro de vuelta antes de cambiar el texto de la ficha
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reducedMotion) {
+    advance();
+  } else {
+    setTimeout(advance, FLIP_MS);
+  }
+}
+
+function advance() {
+  state.index += 1;
+  state.busy = false;
+  if (state.index >= state.queue.length) {
+    state.status = "result";
+  }
+  updateStrip();
+  render();
+  if (state.status === "session") {
+    elements.card.focus({ preventScroll: true });
+  }
+}
+
+function onKeydown(event) {
+  if (event.ctrlKey || event.metaKey || event.altKey || event.repeat || state.status !== "session") {
+    return;
+  }
+  if (event.key === "1") {
+    grade(false);
+  } else if (event.key === "2") {
+    grade(true);
+  } else if (event.key === " " && document.activeElement === document.body) {
+    event.preventDefault();
+    flip();
+  }
 }
 
 function renderFlip() {
@@ -130,7 +185,9 @@ async function loadStudy() {
 
 function render() {
   const { status, deck, queue } = state;
-  const loaded = status === "session" || status === "empty";
+  const loaded = status === "session" || status === "empty" || status === "result";
+  const known = state.results.filter((result) => result === true).length;
+  const missed = state.results.filter((result) => result === false).length;
 
   elements.missing.hidden = status !== "missing";
   elements.content.hidden = status === "missing";
@@ -155,11 +212,11 @@ function render() {
   elements.strip.classList.toggle("invisible", status !== "session" && status !== "result");
 
   if (status === "session") {
-    const known = state.results.filter((result) => result === true).length;
-    const missed = state.results.filter((result) => result === false).length;
     elements.summary.textContent =
       `Tarjeta ${state.index + 1} de ${queue.length} · ${plural(known, "sabida", "sabidas")} · ${missed} por repasar`;
     renderCard();
+  } else if (status === "result") {
+    elements.summary.textContent = `Repaso terminado · ${plural(known, "sabida", "sabidas")} · ${missed} por repasar`;
   } else if (status === "empty") {
     elements.summary.textContent = "Sin tarjetas para repasar";
   } else if (status === "missing") {
