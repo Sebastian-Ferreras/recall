@@ -117,6 +117,21 @@ dialog::backdrop {
   transform: rotateY(180deg);
 }
 
+.ruled {
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--line) 27px, var(--line) 28px);
+  background-position: 0 6px;
+}
+.ruled-back {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 27px,
+    color-mix(in oklab, var(--on-primary) 20%, transparent) 27px,
+    color-mix(in oklab, var(--on-primary) 20%, transparent) 28px
+  );
+  background-position: 0 6px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
