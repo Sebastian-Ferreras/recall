@@ -17,6 +17,15 @@ public class CardsController(ICardService service) : ControllerBase
         return cards is null ? NotFound() : Ok(cards);
     }
 
+    [HttpGet("decks/{deckId:int}/study")]
+    [ProducesResponseType(typeof(IReadOnlyList<CardDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<CardDto>>> GetStudy(int deckId, CancellationToken ct)
+    {
+        var cards = await service.GetStudyCardsAsync(deckId, ct);
+        return cards is null ? NotFound() : Ok(cards);
+    }
+
     [HttpGet("cards/{id:int}")]
     [ProducesResponseType(typeof(CardDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

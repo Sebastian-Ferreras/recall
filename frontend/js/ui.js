@@ -6,6 +6,12 @@ export function plural(count, one, many) {
   return `${count} ${count === 1 ? one : many}`;
 }
 
+// el id viene de la URL, solo se acepta un entero positivo
+export function readDeckId() {
+  const value = new URLSearchParams(location.search).get("id");
+  return /^[1-9]\d*$/.test(value ?? "") ? Number(value) : null;
+}
+
 export function formatDate(iso) {
   return new Date(iso).toLocaleDateString("es", { day: "numeric", month: "short" });
 }
