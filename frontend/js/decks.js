@@ -1,5 +1,6 @@
 import { getDecks } from "/js/api.js";
-import { formatDate, plural } from "/js/ui.js";
+import { openDeckForm } from "/js/deckForm.js";
+import { formatDate, plural, showToast } from "/js/ui.js";
 
 // con 20 o mas tarjetas se dibuja la segunda carta detras, el mazo se ve mas grueso
 const THICK_DECK = 20;
@@ -31,7 +32,12 @@ export function initDecksPage() {
   elements.deckTemplate = document.getElementById("deck-card");
   elements.newTemplate = document.getElementById("new-deck-card");
 
-  elements.retry.addEventListener("click", loadDecks);
+  elements.deckDialog = document.getElementById("deck-dialog");
+
+  elements.retry.addEventListener("click", () => loadDecks());
+  elements["new-deck"].addEventListener("click", () => openNewDeck());
+  elements["empty-new"].addEventListener("click", () => openNewDeck());
+  elements.grid.addEventListener("click", handleGridClick);
   elements.search.addEventListener("input", () => {
     state.query = elements.search.value;
     render();
@@ -66,9 +72,35 @@ function visibleDecks() {
   return filterDecks(state.decks, state.query).toSorted(sorters[state.sort]);
 }
 
-async function loadDecks() {
-  state.status = "loading";
-  render();
+function openNewDeck() {
+  openDeckForm(elements.deckDialog, null, onDeckSaved);
+}
+
+function handleGridClick(event) {
+  const button = event.target.closest("[data-action]");
+  if (!button) {
+    return;
+  }
+  const deck = state.decks.find((item) => item.id === Number(button.dataset.id));
+
+  if (button.dataset.action === "new") {
+    openNewDeck();
+  } else if (button.dataset.action === "edit" && deck) {
+    openDeckForm(elements.deckDialog, deck, onDeckSaved);
+  }
+}
+
+async function onDeckSaved(deck, created) {
+  await loadDecks({ silent: true });
+  showToast(created ? "Mazo creado" : "Mazo actualizado");
+}
+
+// silent evita el esqueleto de carga al recargar tras guardar, que haria saltar la pantalla
+async function loadDecks({ silent = false } = {}) {
+  if (!silent) {
+    state.status = "loading";
+    render();
+  }
 
   try {
     state.decks = await getDecks();
@@ -156,8 +188,12 @@ function createDeckCard(deck) {
     study.href = `/study.html?id=${deck.id}`;
   }
 
-  node.querySelector("[data-edit]").setAttribute("aria-label", `Editar ${deck.name}`);
-  node.querySelector("[data-delete]").setAttribute("aria-label", `Borrar ${deck.name}`);
+  const edit = node.querySelector('[data-action="edit"]');
+  edit.setAttribute("aria-label", `Editar ${deck.name}`);
+  edit.dataset.id = deck.id;
+  const remove = node.querySelector('[data-action="delete"]');
+  remove.setAttribute("aria-label", `Borrar ${deck.name}`);
+  remove.dataset.id = deck.id;
 
   return node;
 }
