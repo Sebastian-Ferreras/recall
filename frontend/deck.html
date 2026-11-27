@@ -19,8 +19,9 @@
     </script>
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
     <link rel="stylesheet" href="/css/brand.css" />
+    <link rel="stylesheet" href="/css/components.css" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- El CDN de Tailwind solo compila bloques en linea, por eso esto no puede ir en brand.css -->
+    <!-- El CDN de Tailwind solo compila bloques en linea, por eso @theme no puede ir en un archivo css -->
     <style type="text/tailwindcss">
       @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -46,19 +47,6 @@
         --color-danger-soft: var(--danger-soft);
         --color-ring: var(--ring);
         --font-display: Georgia, "Times New Roman", serif;
-      }
-
-      @layer components {
-        .btn { @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50; }
-        .btn-sm { @apply h-8 px-3; }
-        .btn-primary { @apply bg-primary text-on-primary hover:bg-primary-hover; }
-        .btn-secondary { @apply border border-line-strong bg-surface text-content hover:bg-sunken; }
-        .btn-ghost { @apply text-content-muted hover:bg-sunken hover:text-content; }
-        .btn-danger { @apply bg-danger text-on-danger hover:opacity-90; }
-        .field { @apply h-10 w-full rounded-lg border border-line-strong bg-surface px-3 text-sm text-content placeholder:text-content-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring; }
-        .field[aria-invalid="true"] { @apply border-danger; }
-        .card { @apply rounded-xl border border-line bg-surface; }
-        .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
       }
 
       .ruled { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--line) 27px, var(--line) 28px); background-position: 0 6px; }

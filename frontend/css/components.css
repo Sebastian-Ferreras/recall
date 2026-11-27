@@ -1,0 +1,103 @@
+/* Debe ir primero: fija el orden de capas antes de que Tailwind (CDN) declare las suyas.
+   Sin esto el preflight le gana a los componentes, y sin la capa las utilidades (pl-9, h-auto) pierden contra ellos */
+@layer theme, base, components, utilities;
+
+@layer components {
+  .btn {
+    display: inline-flex;
+    height: 2.5rem;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    padding-inline: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  .btn:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .btn-sm {
+    height: 2rem;
+    padding-inline: 0.75rem;
+  }
+  .btn-primary {
+    background-color: var(--primary);
+    color: var(--on-primary);
+  }
+  .btn-secondary {
+    border: 1px solid var(--line-strong);
+    background-color: var(--surface);
+    color: var(--content);
+  }
+  .btn-ghost {
+    color: var(--content-muted);
+  }
+  .btn-danger {
+    background-color: var(--danger);
+    color: var(--on-danger);
+  }
+  @media (hover: hover) {
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary:hover {
+      background-color: var(--sunken);
+    }
+    .btn-ghost:hover {
+      background-color: var(--sunken);
+      color: var(--content);
+    }
+    .btn-danger:hover {
+      opacity: 0.9;
+    }
+  }
+
+  .field {
+    height: 2.5rem;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid var(--line-strong);
+    background-color: var(--surface);
+    padding-inline: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--content);
+  }
+  .field::placeholder {
+    color: var(--content-muted);
+  }
+  .field:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 1px;
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--danger);
+  }
+
+  .card {
+    border-radius: 0.75rem;
+    border: 1px solid var(--line);
+    background-color: var(--surface);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+  }
+}
