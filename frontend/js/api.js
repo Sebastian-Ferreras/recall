@@ -63,6 +63,10 @@ export function getCards(deckId) {
   return request(`/decks/${deckId}/cards`);
 }
 
+export function getStudyCards(deckId) {
+  return request(`/decks/${deckId}/study`);
+}
+
 export function createCard(deckId, data) {
   return request(`/decks/${deckId}/cards`, {
     method: "POST",

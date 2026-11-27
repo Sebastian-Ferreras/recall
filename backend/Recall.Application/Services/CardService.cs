@@ -18,6 +18,20 @@ public class CardService(ICardRepository cards, IDeckRepository decks) : ICardSe
         return list.Select(c => c.ToDto()).ToList();
     }
 
+    public async Task<IReadOnlyList<CardDto>?> GetStudyCardsAsync(int deckId, CancellationToken ct = default)
+    {
+        var list = await GetByDeckAsync(deckId, ct);
+        if (list is null)
+        {
+            return null;
+        }
+
+        // se baraja en memoria y no con ORDER BY RANDOM() para no atar la consulta a SQLite
+        var shuffled = list.ToArray();
+        Random.Shared.Shuffle(shuffled);
+        return shuffled;
+    }
+
     public async Task<CardDto?> GetByIdAsync(int id, CancellationToken ct = default)
     {
         var card = await cards.GetByIdAsync(id, ct);

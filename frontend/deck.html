@@ -4,72 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Recall - Mazo</title>
-    <!-- Sincrono y antes de pintar para evitar el parpadeo del tema -->
-    <script>
-      (() => {
-        let theme = null;
-        try {
-          theme = localStorage.getItem("recall-theme");
-        } catch {}
-        if (theme !== "dark" && theme !== "light") {
-          theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-        }
-        document.documentElement.dataset.theme = theme;
-      })();
-    </script>
+    <script src="/js/themeInit.js"></script>
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
     <link rel="stylesheet" href="/css/brand.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <script src="/js/tailwindTheme.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- El CDN de Tailwind solo compila bloques en linea, por eso esto no puede ir en brand.css -->
-    <style type="text/tailwindcss">
-      @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
-      @theme inline {
-        --color-canvas: var(--canvas);
-        --color-surface: var(--surface);
-        --color-sunken: var(--sunken);
-        --color-line: var(--line);
-        --color-line-strong: var(--line-strong);
-        --color-content: var(--content);
-        --color-content-muted: var(--content-muted);
-        --color-primary: var(--primary);
-        --color-primary-hover: var(--primary-hover);
-        --color-on-primary: var(--on-primary);
-        --color-accent: var(--accent);
-        --color-accent-text: var(--accent-text);
-        --color-accent-soft: var(--accent-soft);
-        --color-success: var(--success);
-        --color-success-text: var(--success-text);
-        --color-success-soft: var(--success-soft);
-        --color-danger: var(--danger);
-        --color-on-danger: var(--on-danger);
-        --color-danger-soft: var(--danger-soft);
-        --color-ring: var(--ring);
-        --font-display: Georgia, "Times New Roman", serif;
-      }
-
-      @layer components {
-        .btn { @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50; }
-        .btn-sm { @apply h-8 px-3; }
-        .btn-primary { @apply bg-primary text-on-primary hover:bg-primary-hover; }
-        .btn-secondary { @apply border border-line-strong bg-surface text-content hover:bg-sunken; }
-        .btn-ghost { @apply text-content-muted hover:bg-sunken hover:text-content; }
-        .btn-danger { @apply bg-danger text-on-danger hover:opacity-90; }
-        .field { @apply h-10 w-full rounded-lg border border-line-strong bg-surface px-3 text-sm text-content placeholder:text-content-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring; }
-        .field[aria-invalid="true"] { @apply border-danger; }
-        .card { @apply rounded-xl border border-line bg-surface; }
-        .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
-      }
-
-      .flip { perspective: 1200px; }
-      .flip-inner { transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
-      .flip[aria-pressed="true"] .flip-inner { transform: rotateY(180deg); }
-      @media (prefers-reduced-motion: reduce) { .flip-inner { transition: none; } }
-      .face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-      .face-back { transform: rotateY(180deg); }
-      .ruled { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--line) 27px, var(--line) 28px); background-position: 0 6px; }
-      .ruled-back { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, color-mix(in oklab, var(--on-primary) 20%, transparent) 27px, color-mix(in oklab, var(--on-primary) 20%, transparent) 28px); background-position: 0 6px; }
-    </style>
   </head>
   <body class="min-h-screen bg-canvas font-sans text-content antialiased">
     <header class="mx-auto flex max-w-6xl items-center justify-between px-4 pt-8 sm:px-6">
@@ -315,6 +255,7 @@
 
     <script type="module">
       import { initThemeToggle } from "/js/theme.js";
+      import "/js/pageTransition.js";
       import { initDeckPage } from "/js/deck.js";
 
       initThemeToggle(document.getElementById("theme-toggle"));
