@@ -17,10 +17,7 @@
         document.documentElement.dataset.theme = theme;
       })();
     </script>
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f46e5'/%3E%3Crect x='8' y='9' width='16' height='14' rx='2' fill='white'/%3E%3C/svg%3E"
-    />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
     <link rel="stylesheet" href="/css/brand.css" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- El CDN de Tailwind solo compila bloques en linea, por eso esto no puede ir en brand.css -->
@@ -66,14 +63,29 @@
     </style>
   </head>
   <body class="min-h-screen bg-canvas font-sans text-content antialiased">
-    <header class="border-b border-slate-200 bg-white">
-      <div class="mx-auto max-w-4xl px-4 py-4">
-        <a href="/" class="text-xl font-bold text-indigo-600">Recall</a>
+    <header class="mx-auto flex max-w-6xl items-center justify-between px-4 pt-8 sm:px-6">
+      <a href="/" aria-label="Recall, inicio" class="rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+        <img class="h-16 dark:hidden" src="/assets/logo-horizontal.svg" alt="Recall" />
+        <img class="hidden h-16 dark:block" src="/assets/logo-horizontal-dark.svg" alt="Recall" />
+      </a>
+      <div class="flex items-center gap-2">
+        <nav aria-label="Principal">
+          <a href="/" class="rounded-lg px-3 py-2 text-sm font-medium underline decoration-accent decoration-2 underline-offset-8" aria-current="page">Mazos</a>
+        </nav>
+        <button id="theme-toggle" class="btn btn-ghost" type="button" aria-label="Cambiar a modo oscuro">
+          <svg class="icon size-5" aria-hidden="true"><use href="/assets/icons.svg#i-moon" /></svg>
+        </button>
       </div>
     </header>
 
-    <main id="app" class="mx-auto max-w-4xl px-4 py-8">
-      <p class="text-slate-600">Bienvenido a Recall, tu aplicacion de flashcards</p>
+    <main id="app" class="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6">
+      <p class="text-content-muted">Bienvenido a Recall, tu aplicacion de flashcards</p>
     </main>
+
+    <script type="module">
+      import { initThemeToggle } from "/js/theme.js";
+
+      initThemeToggle(document.getElementById("theme-toggle"));
+    </script>
   </body>
 </html>
