@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mazo - Recall</title>
+    <!-- Sincrono y antes de pintar para evitar el parpadeo del tema -->
+    <script>
+      (() => {
+        let theme = null;
+        try {
+          theme = localStorage.getItem("recall-theme");
+        } catch {}
+        if (theme !== "dark" && theme !== "light") {
+          theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="stylesheet" href="/css/brand.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- El CDN de Tailwind solo compila bloques en linea, por eso esto no puede ir en brand.css -->
+    <style type="text/tailwindcss">
+      @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+      @theme inline {
+        --color-canvas: var(--canvas);
+        --color-surface: var(--surface);
+        --color-sunken: var(--sunken);
+        --color-line: var(--line);
+        --color-line-strong: var(--line-strong);
+        --color-content: var(--content);
+        --color-content-muted: var(--content-muted);
+        --color-primary: var(--primary);
+        --color-primary-hover: var(--primary-hover);
+        --color-on-primary: var(--on-primary);
+        --color-accent: var(--accent);
+        --color-accent-text: var(--accent-text);
+        --color-accent-soft: var(--accent-soft);
+        --color-success: var(--success);
+        --color-success-text: var(--success-text);
+        --color-success-soft: var(--success-soft);
+        --color-danger: var(--danger);
+        --color-on-danger: var(--on-danger);
+        --color-danger-soft: var(--danger-soft);
+        --color-ring: var(--ring);
+        --font-display: Georgia, "Times New Roman", serif;
+      }
+
+      @layer components {
+        .btn { @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50; }
+        .btn-sm { @apply h-8 px-3; }
+        .btn-primary { @apply bg-primary text-on-primary hover:bg-primary-hover; }
+        .btn-secondary { @apply border border-line-strong bg-surface text-content hover:bg-sunken; }
+        .btn-ghost { @apply text-content-muted hover:bg-sunken hover:text-content; }
+        .btn-danger { @apply bg-danger text-on-danger hover:opacity-90; }
+        .field { @apply h-10 w-full rounded-lg border border-line-strong bg-surface px-3 text-sm text-content placeholder:text-content-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring; }
+        .field[aria-invalid="true"] { @apply border-danger; }
+        .card { @apply rounded-xl border border-line bg-surface; }
+        .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+      }
+
+      .flip { perspective: 1200px; }
+      .flip-inner { transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
+      .face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+      .face-back { transform: rotateY(180deg); }
+      .ruled { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, var(--line) 27px, var(--line) 28px); background-position: 0 6px; }
+      .ruled-back { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, color-mix(in oklab, var(--on-primary) 20%, transparent) 27px, color-mix(in oklab, var(--on-primary) 20%, transparent) 28px); background-position: 0 6px; }
+    </style>
+  </head>
+  <body class="min-h-screen bg-canvas font-sans text-content antialiased">
+    <header class="mx-auto flex max-w-6xl items-center justify-between px-4 pt-8 sm:px-6">
+      <a href="/" aria-label="Recall, inicio" class="rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+        <img class="h-16 dark:hidden" src="/assets/logo-horizontal.svg" alt="Recall" />
+        <img class="hidden h-16 dark:block" src="/assets/logo-horizontal-dark.svg" alt="Recall" />
+      </a>
+      <div class="flex items-center gap-2">
+        <nav aria-label="Principal">
+          <a href="/" class="rounded-lg px-3 py-2 text-sm font-medium">Mazos</a>
+        </nav>
+        <button id="theme-toggle" class="btn btn-ghost" type="button" aria-label="Cambiar a modo oscuro">
+          <svg class="icon size-5" aria-hidden="true"><use href="/assets/icons.svg#i-moon" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="app" class="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-10 sm:px-6">
+      <div class="flex flex-wrap items-end justify-between gap-4 pr-3.5">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <h1 id="title" class="min-w-0 truncate text-3xl font-semibold tracking-tight">&nbsp;</h1>
+            <button id="edit-deck" class="btn btn-ghost btn-sm flex-none invisible" type="button" aria-label="Editar mazo" title="Editar mazo">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-edit" /></svg>
+            </button>
+            <span id="count-badge" class="badge invisible flex-none bg-sunken text-content-muted"></span>
+          </div>
+          <p id="summary" class="mt-1 min-h-5 truncate text-sm text-content-muted">&nbsp;</p>
+        </div>
+        <div id="deck-actions" class="invisible flex flex-wrap gap-2">
+          <a id="study" class="btn btn-secondary" href="#"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-play" /></svg>Estudiar</a>
+          <button id="new-card" class="btn btn-primary" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-plus" /></svg>Nueva tarjeta</button>
+        </div>
+      </div>
+
+      <div id="missing" hidden class="mr-3.5 rounded-xl border border-line bg-surface px-6 py-16 text-center">
+        <img src="/assets/mark.svg" alt="" class="mx-auto size-14 opacity-80 dark:hidden" />
+        <img src="/assets/mark-dark.svg" alt="" class="mx-auto hidden size-14 opacity-80 dark:block" />
+        <h2 class="mt-4 text-lg font-semibold">No encontramos este mazo</h2>
+        <p class="mx-auto mt-1 max-w-sm text-sm text-content-muted">Puede que se haya borrado o que el enlace este mal escrito.</p>
+        <a href="/" class="btn btn-primary mt-5">Volver a mis mazos</a>
+      </div>
+
+      <div id="content" class="space-y-6">
+        <div id="error" hidden role="alert" class="mr-3.5 flex flex-wrap items-center gap-3 rounded-xl border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg>
+          <p id="error-text" class="flex-1">No se pudieron cargar las tarjetas</p>
+          <button id="retry" class="btn btn-secondary btn-sm" type="button">Reintentar</button>
+        </div>
+
+        <div id="loading" hidden class="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3" role="status" aria-label="Cargando tarjetas">
+          <div class="pb-3.5 pr-3.5"><div class="aspect-[5/3] animate-pulse rounded-lg bg-sunken"></div></div>
+          <div class="pb-3.5 pr-3.5"><div class="aspect-[5/3] animate-pulse rounded-lg bg-sunken"></div></div>
+          <div class="hidden pb-3.5 pr-3.5 lg:block"><div class="aspect-[5/3] animate-pulse rounded-lg bg-sunken"></div></div>
+        </div>
+
+        <div id="empty" hidden class="mr-3.5 rounded-xl border border-dashed border-line-strong bg-surface px-6 py-16 text-center">
+          <img src="/assets/mark.svg" alt="" class="mx-auto size-14 dark:hidden" />
+          <img src="/assets/mark-dark.svg" alt="" class="mx-auto hidden size-14 dark:block" />
+          <h2 class="mt-4 text-lg font-semibold">Este mazo aun no tiene tarjetas</h2>
+          <p class="mx-auto mt-1 max-w-sm text-sm text-content-muted">Cada tarjeta lleva una pregunta y su respuesta. Agrega la primera para poder estudiar este mazo.</p>
+          <button id="empty-new" class="btn btn-primary mt-5" type="button">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-plus" /></svg>Crear mi primera tarjeta
+          </button>
+        </div>
+
+        <div id="grid" class="grid items-start gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3"></div>
+      </div>
+    </main>
+
+    <template id="card-item">
+      <article class="flex flex-col gap-3">
+        <div class="pb-3.5 pr-3.5 transition-transform hover:-translate-y-1">
+          <button data-flip type="button" aria-pressed="false" class="flip block aspect-[5/3] w-full cursor-pointer rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+            <span class="flip-inner relative block h-full w-full">
+              <span data-front class="face lift absolute inset-0 block overflow-hidden rounded-lg border border-line-strong/60 bg-surface">
+                <span class="flex h-10 items-center justify-between border-b-2 border-accent px-4 text-xs text-content-muted">
+                  <span class="flex items-center gap-2"><span aria-hidden="true" class="size-1.5 rotate-45 bg-accent"></span>Pregunta</span>
+                  <span class="flex items-center gap-2"><span>N.º <span data-n class="tabular-nums"></span></span><svg aria-hidden="true" class="icon size-3.5"><use href="/assets/icons.svg#i-flip" /></svg></span>
+                </span>
+                <span class="ruled absolute inset-x-0 bottom-0 top-10 block px-4 pt-1.5">
+                  <span data-q class="line-clamp-5 whitespace-pre-line break-words font-display text-lg leading-7"></span>
+                </span>
+              </span>
+              <span data-back class="face face-back lift absolute inset-0 block overflow-hidden rounded-lg bg-primary text-on-primary">
+                <span class="flex h-10 items-center justify-between border-b-2 border-accent px-4 text-xs text-on-primary/80 dark:border-on-primary/60">
+                  <span class="flex items-center gap-2"><span aria-hidden="true" class="size-1.5 rotate-45 bg-accent dark:bg-on-primary/70"></span>Respuesta</span>
+                  <span>N.º <span data-n class="tabular-nums"></span></span>
+                </span>
+                <span class="ruled-back absolute inset-x-0 bottom-0 top-10 block px-4 pt-1.5">
+                  <span data-a class="line-clamp-5 whitespace-pre-line break-words font-display text-lg leading-7"></span>
+                </span>
+              </span>
+            </span>
+          </button>
+        </div>
+        <div class="flex items-center gap-1 pr-3.5">
+          <button data-action="turn" class="btn btn-secondary btn-sm flex-1" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-flip" /></svg>Voltear</button>
+          <button data-action="edit" class="btn btn-ghost btn-sm" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-edit" /></svg></button>
+          <button data-action="delete" class="btn btn-ghost btn-sm" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-trash" /></svg></button>
+        </div>
+      </article>
+    </template>
+
+    <template id="new-card-tile">
+      <div class="pb-3.5 pr-3.5">
+        <button data-action="new" type="button" class="flex aspect-[5/3] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-line-strong text-sm font-medium text-content-muted transition-colors hover:bg-sunken hover:text-content focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+          <svg class="icon size-6" aria-hidden="true"><use href="/assets/icons.svg#i-plus" /></svg><span>Nueva tarjeta</span>
+        </button>
+      </div>
+    </template>
+
+    <script type="module">
+      import { initThemeToggle } from "/js/theme.js";
+      import { initDeckPage } from "/js/deck.js";
+
+      initThemeToggle(document.getElementById("theme-toggle"));
+      initDeckPage();
+    </script>
+  </body>
+</html>
