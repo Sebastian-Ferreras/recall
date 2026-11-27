@@ -239,6 +239,24 @@
       </form>
     </dialog>
 
+    <dialog id="delete-dialog" class="card w-[calc(100%-2rem)] max-w-md p-0 text-content shadow-xl" aria-labelledby="delete-title" aria-describedby="delete-text">
+      <div class="space-y-5 p-6">
+        <div class="flex gap-4">
+          <span class="flex size-10 flex-none items-center justify-center rounded-full bg-danger-soft text-danger">
+            <svg class="icon size-5" aria-hidden="true"><use href="/assets/icons.svg#i-trash" /></svg>
+          </span>
+          <div class="min-w-0 space-y-1">
+            <h2 id="delete-title" class="text-lg font-semibold">¿Borrar esta tarjeta?</h2>
+            <p id="delete-text" data-delete-text class="line-clamp-3 break-words text-sm text-content-muted"></p>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button type="button" class="btn btn-secondary" data-close>Cancelar</button>
+          <button type="button" class="btn btn-danger" data-confirm>Borrar tarjeta</button>
+        </div>
+      </div>
+    </dialog>
+
     <dialog id="view-dialog" class="card w-[calc(100%-2rem)] max-w-lg p-0 text-content shadow-xl" aria-labelledby="view-title">
       <div class="space-y-5 p-6">
         <h2 id="view-title" class="text-lg font-semibold">Tarjeta</h2>

@@ -1,5 +1,5 @@
-import { ApiError, createCard, getCards, getDeck, updateCard } from "/js/api.js";
-import { firstMessage, normalizeText, plural, setCounter, setFieldError, showToast } from "/js/ui.js";
+import { ApiError, createCard, deleteCard, getCards, getDeck, updateCard } from "/js/api.js";
+import { confirmDelete, firstMessage, normalizeText, plural, setCounter, setFieldError, showToast } from "/js/ui.js";
 
 const QUESTION_MAX = 500;
 const ANSWER_MAX = 1000;
@@ -85,7 +85,32 @@ function handleGridClick(event) {
     if (card) {
       openCardForm(card);
     }
+  } else if (article && target.dataset.action === "delete") {
+    const card = state.cards.find((item) => item.id === Number(article.dataset.id));
+    if (card) {
+      removeCard(card);
+    }
   }
+}
+
+async function removeCard(card) {
+  const confirmed = await confirmDelete(
+    document.getElementById("delete-dialog"),
+    `«${card.question}» se borrara junto con su respuesta. Esta accion no se puede deshacer.`,
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    await deleteCard(card.id);
+  } catch (error) {
+    showToast(`No se pudo borrar la tarjeta: ${error.message}`, true);
+    return;
+  }
+  state.flipped.delete(card.id);
+  await loadDeck({ silent: true });
+  showToast("Tarjeta borrada");
 }
 
 function openCardView(id) {
