@@ -1,6 +1,15 @@
 import { ApiError, createCard, deleteCard, getCards, getDeck, updateCard } from "/js/api.js";
 import { openDeckForm } from "/js/deckForm.js";
-import { confirmDelete, firstMessage, normalizeText, plural, setCounter, setFieldError, showToast } from "/js/ui.js";
+import {
+  confirmDelete,
+  firstMessage,
+  normalizeText,
+  plural,
+  readDeckId,
+  setCounter,
+  setFieldError,
+  showToast,
+} from "/js/ui.js";
 
 const QUESTION_MAX = 500;
 const ANSWER_MAX = 1000;
@@ -158,12 +167,6 @@ function applyFlip(article, flipped) {
   article.querySelector("[data-flip]").setAttribute("aria-pressed", String(flipped));
   article.querySelector("[data-front]").setAttribute("aria-hidden", String(flipped));
   article.querySelector("[data-back]").setAttribute("aria-hidden", String(!flipped));
-}
-
-// el id viene de la URL, solo se acepta un entero positivo
-function readDeckId() {
-  const value = new URLSearchParams(location.search).get("id");
-  return /^[1-9]\d*$/.test(value ?? "") ? Number(value) : null;
 }
 
 // silent evita el esqueleto de carga al recargar tras guardar, que haria saltar la pantalla
