@@ -203,8 +203,26 @@
       </form>
     </dialog>
 
+    <dialog id="delete-dialog" class="card w-[calc(100%-2rem)] max-w-md p-0 text-content shadow-xl" aria-labelledby="delete-title" aria-describedby="delete-text">
+      <div class="space-y-5 p-6">
+        <div class="flex gap-4">
+          <span class="flex size-10 flex-none items-center justify-center rounded-full bg-danger-soft text-danger">
+            <svg class="icon size-5" aria-hidden="true"><use href="/assets/icons.svg#i-trash" /></svg>
+          </span>
+          <div class="min-w-0 space-y-1">
+            <h2 id="delete-title" class="text-lg font-semibold">¿Borrar este mazo?</h2>
+            <p id="delete-text" data-delete-text class="break-words text-sm text-content-muted"></p>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button type="button" class="btn btn-secondary" data-close>Cancelar</button>
+          <button type="button" class="btn btn-danger" data-confirm>Borrar mazo</button>
+        </div>
+      </div>
+    </dialog>
+
     <div id="toast" hidden role="status" class="fixed bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-on-primary shadow-lg">
-      <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-check" /></svg><span id="toast-text"></span>
+      <svg class="icon" aria-hidden="true"><use id="toast-icon" href="/assets/icons.svg#i-check" /></svg><span id="toast-text"></span>
     </div>
 
     <script type="module">

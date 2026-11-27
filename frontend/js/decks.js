@@ -1,6 +1,6 @@
-import { getDecks } from "/js/api.js";
+import { deleteDeck, getDecks } from "/js/api.js";
 import { openDeckForm } from "/js/deckForm.js";
-import { formatDate, plural, showToast } from "/js/ui.js";
+import { confirmDelete, formatDate, plural, showToast } from "/js/ui.js";
 
 // con 20 o mas tarjetas se dibuja la segunda carta detras, el mazo se ve mas grueso
 const THICK_DECK = 20;
@@ -33,6 +33,7 @@ export function initDecksPage() {
   elements.newTemplate = document.getElementById("new-deck-card");
 
   elements.deckDialog = document.getElementById("deck-dialog");
+  elements.deleteDialog = document.getElementById("delete-dialog");
 
   elements.retry.addEventListener("click", () => loadDecks());
   elements["new-deck"].addEventListener("click", () => openNewDeck());
@@ -87,7 +88,34 @@ function handleGridClick(event) {
     openNewDeck();
   } else if (button.dataset.action === "edit" && deck) {
     openDeckForm(elements.deckDialog, deck, onDeckSaved);
+  } else if (button.dataset.action === "delete" && deck) {
+    removeDeck(deck);
   }
+}
+
+async function removeDeck(deck) {
+  let cards = "";
+  if (deck.cardCount === 1) {
+    cards = " y su tarjeta";
+  } else if (deck.cardCount > 1) {
+    cards = ` y sus ${deck.cardCount} tarjetas`;
+  }
+  const confirmed = await confirmDelete(
+    elements.deleteDialog,
+    `Se borrara «${deck.name}»${cards}. Esta accion no se puede deshacer.`,
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    await deleteDeck(deck.id);
+  } catch (error) {
+    showToast(`No se pudo borrar el mazo: ${error.message}`, true);
+    return;
+  }
+  await loadDecks({ silent: true });
+  showToast("Mazo borrado");
 }
 
 async function onDeckSaved(deck, created) {
