@@ -10,6 +10,11 @@ export function formatDate(iso) {
   return new Date(iso).toLocaleDateString("es", { day: "numeric", month: "short" });
 }
 
+// NFD separa la tilde de la letra y el rango quita las marcas, asi "anatomia" encuentra "Anatomía" con o sin tilde
+export function normalizeText(text) {
+  return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
 export function setCounter(input, counter, max) {
   counter.textContent = `${input.value.length} / ${max}`;
 }

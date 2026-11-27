@@ -1,5 +1,5 @@
 import { ApiError, getCards, getDeck } from "/js/api.js";
-import { plural } from "/js/ui.js";
+import { normalizeText, plural } from "/js/ui.js";
 
 const state = {
   status: "loading",
@@ -7,14 +7,24 @@ const state = {
   cards: [],
   errorMessage: "",
   flipped: new Set(),
+  query: "",
+  sort: "old",
 };
 
 const elements = {};
+
+// el numero de la ficha es su posicion de creacion y no cambia con el orden elegido
+const sorters = {
+  old: (a, b) => a.number - b.number,
+  recent: (a, b) => b.number - a.number,
+  az: (a, b) => a.card.question.localeCompare(b.card.question, "es"),
+};
 
 export function initDeckPage() {
   const ids = [
     "title", "summary", "count-badge", "edit-deck", "deck-actions", "study", "new-card",
     "missing", "content", "error", "error-text", "retry", "loading", "empty", "grid",
+    "toolbar", "search", "sort", "no-results", "no-results-q", "clear-search",
   ];
   for (const id of ids) {
     elements[id] = document.getElementById(id);
@@ -24,6 +34,20 @@ export function initDeckPage() {
 
   elements.retry.addEventListener("click", () => loadDeck());
   elements.grid.addEventListener("click", handleGridClick);
+  elements.search.addEventListener("input", () => {
+    state.query = elements.search.value;
+    render();
+  });
+  elements.sort.addEventListener("change", () => {
+    state.sort = elements.sort.value;
+    render();
+  });
+  elements["clear-search"].addEventListener("click", () => {
+    state.query = "";
+    elements.search.value = "";
+    render();
+    elements.search.focus();
+  });
   elements.viewDialog = document.getElementById("view-dialog");
   for (const button of elements.viewDialog.querySelectorAll("[data-close]")) {
     button.addEventListener("click", () => elements.viewDialog.close());
@@ -124,10 +148,30 @@ async function loadDeck() {
   render();
 }
 
+function filterCards(items, query) {
+  const needle = normalizeText(query.trim());
+  if (!needle) {
+    return items;
+  }
+  return items.filter(({ card }) => normalizeText(`${card.question} ${card.answer}`).includes(needle));
+}
+
+function visibleCards() {
+  const items = state.cards.map((card, index) => ({ card, number: index + 1 }));
+  return filterCards(items, state.query).toSorted(sorters[state.sort]);
+}
+
 function render() {
   const { status, deck } = state;
   const loaded = status === "ready" || status === "empty";
   const cardCount = state.cards.length;
+  const ready = status === "ready";
+  const items = ready ? visibleCards() : [];
+  const searching = state.query.trim() !== "";
+
+  elements.toolbar.hidden = !ready;
+  elements["no-results"].hidden = !(ready && items.length === 0);
+  elements["no-results-q"].textContent = state.query.trim();
 
   elements.loading.hidden = status !== "loading";
   elements.error.hidden = status !== "error";
@@ -139,8 +183,8 @@ function render() {
   renderHeader(loaded);
 
   elements.grid.replaceChildren();
-  if (status === "ready") {
-    renderCards();
+  if (items.length > 0) {
+    renderCards(items, !searching);
   }
 
   if (loaded) {
@@ -194,12 +238,14 @@ function renderHeader(loaded) {
   study.classList.toggle("opacity-50", !loaded || noCards);
 }
 
-function renderCards() {
+function renderCards(items, withNewTile) {
   const fragment = document.createDocumentFragment();
-  state.cards.forEach((card, index) => {
-    fragment.append(createCardItem(card, index + 1));
-  });
-  fragment.append(elements.newTemplate.content.cloneNode(true));
+  for (const { card, number } of items) {
+    fragment.append(createCardItem(card, number));
+  }
+  if (withNewTile) {
+    fragment.append(elements.newTemplate.content.cloneNode(true));
+  }
   elements.grid.append(fragment);
   markClippedCards();
 }

@@ -1,6 +1,6 @@
 import { deleteDeck, getDecks } from "/js/api.js";
 import { openDeckForm } from "/js/deckForm.js";
-import { confirmDelete, formatDate, plural, showToast } from "/js/ui.js";
+import { confirmDelete, formatDate, normalizeText, plural, showToast } from "/js/ui.js";
 
 // con 20 o mas tarjetas se dibuja la segunda carta detras, el mazo se ve mas grueso
 const THICK_DECK = 20;
@@ -56,17 +56,12 @@ export function initDecksPage() {
   loadDecks();
 }
 
-// NFD separa la tilde de la letra y el rango quita las marcas, asi "anatomia" encuentra "Anatomia" con o sin tilde
-function normalize(text) {
-  return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-}
-
 function filterDecks(decks, query) {
-  const needle = normalize(query.trim());
+  const needle = normalizeText(query.trim());
   if (!needle) {
     return decks;
   }
-  return decks.filter((deck) => normalize(`${deck.name} ${deck.description ?? ""}`).includes(needle));
+  return decks.filter((deck) => normalizeText(`${deck.name} ${deck.description ?? ""}`).includes(needle));
 }
 
 function visibleDecks() {
