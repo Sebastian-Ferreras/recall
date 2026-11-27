@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-38 -38 76 76" role="img" aria-label="Recall">
+  <style>
+    .a { fill: #1F2A44; }
+    .b { fill: #B08D57; stroke: #B08D57; }
+    .d { fill: #1F2A44; }
+    @media (prefers-color-scheme: dark) {
+      .a { fill: #F2F4F8; }
+      .b { fill: #D1AE72; stroke: #D1AE72; }
+    }
+  </style>
+  <rect class="a" x="-36" y="-36" width="32" height="72" rx="5"/>
+  <polygon class="b" points="3,-30 31,-22 31,24 3,32" stroke-width="5" stroke-linejoin="round"/>
+  <polygon class="d" points="17,-8 23,1 17,10 11,1"/>
+</svg>

@@ -9,12 +9,33 @@ Aplicación de flashcards para organizar y repasar tarjetas de estudio por mazos
 
 El CDN de Tailwind compila los estilos en el navegador; para producción se usaría su CLI.
 
+## Funcionalidades
+
+- **Mazos** (`/`): crear, editar y borrar mazos con confirmación, buscar por nombre o descripción y ordenar por recientes, nombre o cantidad de tarjetas
+- **Tarjetas** (`/deck.html?id=1`): crear, editar y borrar tarjetas de un mazo, voltearlas para ver la respuesta, buscar y ordenar, y editar el mazo desde la misma pantalla
+- Modo claro y oscuro, que sigue el del sistema y se recuerda entre visitas
+- Estados de carga, error con reintento, vacío y sin resultados en cada pantalla
+
+El enlace "Estudiar" apunta a `study.html`, que llega con el modo de repaso.
+
 ## Estructura
 
 ```
 recall/
 ├── backend/     API en capas (Api, Application, Domain, Infrastructure)
 └── frontend/    Archivos estáticos que sirve la API
+    ├── assets/      Logo, favicon e iconos de la marca
+    ├── css/
+    │   └── brand.css    Variables de color y estilos compartidos
+    ├── index.html   Mazos
+    ├── deck.html    Tarjetas de un mazo
+    └── js/
+        ├── api.js       Llamadas a la API
+        ├── ui.js        Utilidades de interfaz (toast, errores de campo, confirmación)
+        ├── theme.js     Cambio entre modo claro y oscuro
+        ├── deckForm.js  Formulario de mazo, compartido por las dos pantallas
+        ├── decks.js     Pantalla de mazos
+        └── deck.js      Pantalla de tarjetas
 ```
 
 ## Base de datos

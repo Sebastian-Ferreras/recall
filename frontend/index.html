@@ -4,21 +4,233 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Recall</title>
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f46e5'/%3E%3Crect x='8' y='9' width='16' height='14' rx='2' fill='white'/%3E%3C/svg%3E"
-    />
+    <!-- Sincrono y antes de pintar para evitar el parpadeo del tema -->
+    <script>
+      (() => {
+        let theme = null;
+        try {
+          theme = localStorage.getItem("recall-theme");
+        } catch {}
+        if (theme !== "dark" && theme !== "light") {
+          theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="stylesheet" href="/css/brand.css" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- El CDN de Tailwind solo compila bloques en linea, por eso esto no puede ir en brand.css -->
+    <style type="text/tailwindcss">
+      @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+      @theme inline {
+        --color-canvas: var(--canvas);
+        --color-surface: var(--surface);
+        --color-sunken: var(--sunken);
+        --color-line: var(--line);
+        --color-line-strong: var(--line-strong);
+        --color-content: var(--content);
+        --color-content-muted: var(--content-muted);
+        --color-primary: var(--primary);
+        --color-primary-hover: var(--primary-hover);
+        --color-on-primary: var(--on-primary);
+        --color-accent: var(--accent);
+        --color-accent-text: var(--accent-text);
+        --color-accent-soft: var(--accent-soft);
+        --color-success: var(--success);
+        --color-success-text: var(--success-text);
+        --color-success-soft: var(--success-soft);
+        --color-danger: var(--danger);
+        --color-on-danger: var(--on-danger);
+        --color-danger-soft: var(--danger-soft);
+        --color-ring: var(--ring);
+        --font-display: Georgia, "Times New Roman", serif;
+      }
+
+      @layer components {
+        .btn { @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50; }
+        .btn-sm { @apply h-8 px-3; }
+        .btn-primary { @apply bg-primary text-on-primary hover:bg-primary-hover; }
+        .btn-secondary { @apply border border-line-strong bg-surface text-content hover:bg-sunken; }
+        .btn-ghost { @apply text-content-muted hover:bg-sunken hover:text-content; }
+        .btn-danger { @apply bg-danger text-on-danger hover:opacity-90; }
+        .field { @apply h-10 w-full rounded-lg border border-line-strong bg-surface px-3 text-sm text-content placeholder:text-content-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring; }
+        .field[aria-invalid="true"] { @apply border-danger; }
+        .card { @apply rounded-xl border border-line bg-surface; }
+        .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+      }
+    </style>
   </head>
-  <body class="min-h-screen bg-slate-50 text-slate-900">
-    <header class="border-b border-slate-200 bg-white">
-      <div class="mx-auto max-w-4xl px-4 py-4">
-        <a href="/" class="text-xl font-bold text-indigo-600">Recall</a>
+  <body class="min-h-screen bg-canvas font-sans text-content antialiased">
+    <header class="mx-auto flex max-w-6xl items-center justify-between px-4 pt-8 sm:px-6">
+      <a href="/" aria-label="Recall, inicio" class="rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+        <img class="h-16 dark:hidden" src="/assets/logo-horizontal.svg" alt="Recall" />
+        <img class="hidden h-16 dark:block" src="/assets/logo-horizontal-dark.svg" alt="Recall" />
+      </a>
+      <div class="flex items-center gap-2">
+        <nav aria-label="Principal">
+          <a href="/" class="rounded-lg px-3 py-2 text-sm font-medium underline decoration-accent decoration-2 underline-offset-8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" aria-current="page">Mazos</a>
+        </nav>
+        <button id="theme-toggle" class="btn btn-ghost" type="button" aria-label="Cambiar a modo oscuro">
+          <svg class="icon size-5" aria-hidden="true"><use href="/assets/icons.svg#i-moon" /></svg>
+        </button>
       </div>
     </header>
 
-    <main id="app" class="mx-auto max-w-4xl px-4 py-8">
-      <p class="text-slate-600">Bienvenido a Recall, tu aplicacion de flashcards</p>
+    <main id="app" class="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-10 sm:px-6">
+      <div class="flex flex-wrap items-end justify-between gap-4 pr-3.5">
+        <div>
+          <h1 class="text-3xl font-semibold tracking-tight">Mazos</h1>
+          <p id="summary" class="mt-1 text-sm text-content-muted" aria-live="polite">&nbsp;</p>
+        </div>
+        <button id="new-deck" class="btn btn-primary" type="button" hidden>
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-plus" /></svg>Nuevo mazo
+        </button>
+      </div>
+
+      <div id="toolbar" hidden class="grid gap-x-6 gap-y-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div class="relative pr-3.5 md:col-span-2 lg:col-span-3">
+          <svg class="icon pointer-events-none absolute left-3 top-3 text-content-muted" aria-hidden="true"><use href="/assets/icons.svg#i-search" /></svg>
+          <input id="search" class="field pl-9" type="search" placeholder="Buscar mazos" aria-label="Buscar mazos" autocomplete="off" />
+        </div>
+        <div class="relative pr-3.5">
+          <label for="sort" class="sr-only">Ordenar mazos</label>
+          <svg class="icon pointer-events-none absolute right-[30px] top-3 text-content-muted" aria-hidden="true"><use href="/assets/icons.svg#i-chevron" /></svg>
+          <select id="sort" class="field appearance-none pr-10">
+            <option value="recent">Ordenar: mas recientes</option>
+            <option value="name">Ordenar: nombre (A-Z)</option>
+            <option value="cards">Ordenar: mas tarjetas</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="error" hidden role="alert" class="mr-3.5 flex flex-wrap items-center gap-3 rounded-xl border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg>
+        <p id="error-text" class="flex-1">No se pudieron cargar los mazos</p>
+        <button id="retry" class="btn btn-secondary btn-sm" type="button">Reintentar</button>
+      </div>
+
+      <div id="loading" hidden class="grid gap-x-6 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" role="status" aria-label="Cargando mazos">
+        <div class="pb-3.5 pr-3.5"><div class="aspect-[5/7] animate-pulse rounded-xl bg-sunken"></div></div>
+        <div class="pb-3.5 pr-3.5"><div class="aspect-[5/7] animate-pulse rounded-xl bg-sunken"></div></div>
+        <div class="hidden pb-3.5 pr-3.5 md:block"><div class="aspect-[5/7] animate-pulse rounded-xl bg-sunken"></div></div>
+        <div class="hidden pb-3.5 pr-3.5 lg:block"><div class="aspect-[5/7] animate-pulse rounded-xl bg-sunken"></div></div>
+      </div>
+
+      <div id="empty" hidden class="mr-3.5 rounded-xl border border-dashed border-line-strong bg-surface px-6 py-16 text-center">
+        <img src="/assets/mark.svg" alt="" class="mx-auto size-14 dark:hidden" />
+        <img src="/assets/mark-dark.svg" alt="" class="mx-auto hidden size-14 dark:block" />
+        <h2 class="mt-4 text-lg font-semibold">Aun no tienes mazos</h2>
+        <p class="mx-auto mt-1 max-w-sm text-sm text-content-muted">Un mazo agrupa tarjetas de pregunta y respuesta. Crea el primero y empieza a estudiar.</p>
+        <button id="empty-new" class="btn btn-primary mt-5" type="button">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-plus" /></svg>Crear mi primer mazo
+        </button>
+      </div>
+
+      <div id="no-results" hidden class="mr-3.5 rounded-xl border border-line bg-surface px-6 py-12 text-center">
+        <h2 class="font-semibold">Sin resultados para «<span id="no-results-q"></span>»</h2>
+        <p class="mt-1 text-sm text-content-muted">Prueba con otra palabra o revisa la ortografia.</p>
+        <button id="clear-search" class="btn btn-secondary btn-sm mt-4" type="button">Limpiar busqueda</button>
+      </div>
+
+      <div id="grid" class="grid items-start gap-x-6 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
     </main>
+
+    <template id="deck-card">
+      <article class="flex flex-col gap-3">
+        <div class="relative pb-3.5 pr-3.5">
+          <div data-layer2 class="lift-soft absolute bottom-0 left-3 right-0 top-3 rounded-xl border border-line bg-surface"></div>
+          <div data-layer1 class="lift-soft absolute inset-1.5 rounded-xl border border-line bg-surface"></div>
+          <a data-link href="#" class="group lift relative block aspect-[5/7] rounded-xl border border-line-strong/60 bg-surface transition-all hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+            <span class="absolute inset-2 rounded-lg border border-line"></span>
+            <span aria-hidden="true" class="absolute left-4 top-4 flex flex-col items-center gap-1.5 font-display text-2xl leading-none"><span data-initial></span><span class="size-2 rotate-45 bg-accent"></span></span>
+            <span aria-hidden="true" class="absolute bottom-4 right-4 flex rotate-180 flex-col items-center gap-1.5 font-display text-2xl leading-none"><span data-initial></span><span class="size-2 rotate-45 bg-accent"></span></span>
+            <span class="absolute inset-0 flex flex-col items-center justify-center gap-3 px-12 text-center">
+              <span data-name class="line-clamp-3 break-words font-display text-2xl leading-snug"></span>
+              <span data-desc class="line-clamp-3 break-words text-xs leading-relaxed text-content-muted"></span>
+              <span data-count class="text-xs font-medium text-accent-text"></span>
+              <span data-date class="text-xs text-content-muted"></span>
+            </span>
+          </a>
+        </div>
+        <div class="flex items-center gap-1 pr-3.5">
+          <a data-study class="btn btn-primary btn-sm flex-1" href="#"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-play" /></svg>Estudiar</a>
+          <button data-action="edit" class="btn btn-ghost btn-sm" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-edit" /></svg></button>
+          <button data-action="delete" class="btn btn-ghost btn-sm" type="button"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-trash" /></svg></button>
+        </div>
+      </article>
+    </template>
+
+    <template id="new-deck-card">
+      <div class="pb-3.5 pr-3.5">
+        <button data-action="new" type="button" class="flex aspect-[5/7] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-line-strong text-sm font-medium text-content-muted transition-colors hover:bg-sunken hover:text-content focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+          <svg class="icon size-6" aria-hidden="true"><use href="/assets/icons.svg#i-plus" /></svg><span>Nuevo mazo</span>
+        </button>
+      </div>
+    </template>
+
+    <dialog id="deck-dialog" class="card w-[calc(100%-2rem)] max-w-md p-0 text-content shadow-xl" aria-labelledby="deck-dialog-title">
+      <form id="deck-form" class="space-y-5 p-6" novalidate>
+        <h2 id="deck-dialog-title" class="text-lg font-semibold">Nuevo mazo</h2>
+        <div class="space-y-1.5">
+          <div class="flex justify-between">
+            <label for="deck-name" class="text-sm font-medium">Nombre</label>
+            <span id="deck-name-count" class="text-xs text-content-muted">0 / 100</span>
+          </div>
+          <input id="deck-name" class="field" maxlength="100" placeholder="Por ejemplo, Anatomia basica" aria-describedby="deck-name-error" />
+          <p id="deck-name-error" hidden class="flex items-center gap-1.5 text-sm text-danger">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg><span></span>
+          </p>
+        </div>
+        <div class="space-y-1.5">
+          <div class="flex justify-between">
+            <label for="deck-desc" class="text-sm font-medium">Descripcion <span class="font-normal text-content-muted">(opcional)</span></label>
+            <span id="deck-desc-count" class="text-xs text-content-muted">0 / 500</span>
+          </div>
+          <textarea id="deck-desc" rows="3" maxlength="500" class="field h-auto py-2" placeholder="¿Que vas a estudiar con este mazo?" aria-describedby="deck-desc-error"></textarea>
+          <p id="deck-desc-error" hidden class="flex items-center gap-1.5 text-sm text-danger">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg><span></span>
+          </p>
+        </div>
+        <p id="deck-form-error" hidden role="alert" class="flex items-center gap-1.5 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#i-alert" /></svg><span></span>
+        </p>
+        <div class="flex justify-end gap-3">
+          <button type="button" class="btn btn-secondary" data-close>Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="deck-submit">Crear mazo</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="delete-dialog" class="card w-[calc(100%-2rem)] max-w-md p-0 text-content shadow-xl" aria-labelledby="delete-title" aria-describedby="delete-text">
+      <div class="space-y-5 p-6">
+        <div class="flex gap-4">
+          <span class="flex size-10 flex-none items-center justify-center rounded-full bg-danger-soft text-danger">
+            <svg class="icon size-5" aria-hidden="true"><use href="/assets/icons.svg#i-trash" /></svg>
+          </span>
+          <div class="min-w-0 space-y-1">
+            <h2 id="delete-title" class="text-lg font-semibold">¿Borrar este mazo?</h2>
+            <p id="delete-text" data-delete-text class="break-words text-sm text-content-muted"></p>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button type="button" class="btn btn-secondary" data-close>Cancelar</button>
+          <button type="button" class="btn btn-danger" data-confirm>Borrar mazo</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div id="toast" hidden role="status" class="fixed bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-on-primary shadow-lg">
+      <svg class="icon" aria-hidden="true"><use id="toast-icon" href="/assets/icons.svg#i-check" /></svg><span id="toast-text"></span>
+    </div>
+
+    <script type="module">
+      import { initThemeToggle } from "/js/theme.js";
+      import { initDecksPage } from "/js/decks.js";
+
+      initThemeToggle(document.getElementById("theme-toggle"));
+      initDecksPage();
+    </script>
   </body>
 </html>
