@@ -63,7 +63,7 @@ El CDN de Tailwind compila los estilos en el navegador; para producción se usar
 
 ## Inicio rápido
 
-**Requisitos:** [.NET 10 SDK](https://dotnet.microsoft.com/download). No hace falta instalar nada más: la base de datos se crea sola y el frontend no tiene dependencias.
+**Requisitos:** [.NET 10 SDK](https://dotnet.microsoft.com/download), versión 10.0.100 o superior (cualquier 10.0.x sirve; .NET 9 o anterior no). No hace falta instalar nada más: la base de datos se crea sola y el frontend no tiene dependencias.
 
 ```powershell
 git clone https://github.com/Sebastian-Ferreras/recall.git
